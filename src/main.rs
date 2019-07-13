@@ -22,6 +22,44 @@ const BOARD_DISPLAY: &'static str = "   │   │    ┃    │   │    ┃    
    │   │    ┃    │   │    ┃    │   │   \r
 ";
 
+const X_CORNERS: [u16; 3] = [2, 16, 30];
+const Y_CORNERS: [u16; 3] = [1, 7, 13];
+const X_OFFSETS: [u16; 3] = [0, 4, 8];
+const Y_OFFSETS: [u16; 3] = [0, 2, 4];
+
+// converts board number into 2D coords (x, y)
+// 1 is (0, 0), 9 is (2, 2)
+fn board_coordinates(cell: usize) -> (usize, usize) {
+   ((cell - 1) % 3, (cell - 1) / 3)
+}
+
+fn place_piece(
+   stdout: &mut termion::raw::RawTerminal<std::io::Stdout>,
+   local_board: usize,
+   cell: usize,
+) {
+   // the boards and cells are labeled 1 to 9, so we make sure that we only pass 1 to 9
+   assert!(0 < local_board && local_board < 10);
+   assert!(0 < cell && cell < 10);
+
+   // to target the coordinates of the target cell we do it in 2 steps:
+   // 1. go to the top-left of the target local board
+   // 2. offset the cursor to go on the right cell
+   let (corner_x, corner_y) = board_coordinates(local_board);
+   let (offset_x, offset_y) = board_coordinates(cell);
+
+   // then write the piece char at the target
+   write!(
+      stdout,
+      "{}X",
+      cursor::Goto(
+         X_CORNERS[corner_x] + X_OFFSETS[offset_x],
+         Y_CORNERS[corner_y] + Y_OFFSETS[offset_y]
+      )
+   )
+   .unwrap();
+}
+
 fn main() {
    // Enter raw mode.
    let mut stdout = stdout().into_raw_mode().unwrap();
@@ -34,6 +72,8 @@ fn main() {
       board = BOARD_DISPLAY
    )
    .unwrap();
+
+   place_piece(&mut stdout, 9, 1);
 
    stdout.flush().unwrap();
 }
