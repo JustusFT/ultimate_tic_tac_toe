@@ -1,7 +1,18 @@
-use std::io::{stdin, stdout, Write};
+use std::io::{stdout, Write};
 use termion::clear;
 use termion::cursor;
 use termion::raw::IntoRawMode;
+
+const WIN_STATES: [[usize; 3]; 8] = [
+   [0, 1, 2],
+   [3, 4, 5],
+   [6, 7, 8],
+   [0, 3, 6],
+   [1, 4, 7],
+   [2, 5, 8],
+   [0, 4, 8],
+   [2, 4, 6],
+];
 
 const BOARD_DISPLAY: &'static str = "   \
    │   │    ┃    │   │    ┃    │   │   \r
@@ -30,59 +41,197 @@ const Y_CORNERS: [u16; 3] = [1, 7, 13];
 const X_OFFSETS: [u16; 3] = [0, 4, 8];
 const Y_OFFSETS: [u16; 3] = [0, 2, 4];
 
-// converts board number into 2D coords (x, y)
-// 1 is (0, 0), 9 is (2, 2)
-fn board_coordinates(cell: usize) -> (usize, usize) {
-   assert!(0 < cell && cell < 10);
-   ((cell - 1) % 3, (cell - 1) / 3)
+#[derive(Clone, Copy, PartialEq)]
+enum Piece {
+   X,
+   O,
+   BLANK,
 }
 
-// change a piece of the board in the terminal display
-// pass in which local_board (from 1 to 9) has the cell that needs to be changed
-// then do the same for the cell number
-fn set_piece(
-   stdout: &mut termion::raw::RawTerminal<std::io::Stdout>,
-   piece: char,
-   local_board: usize,
-   cell: usize,
-) {
-   // the boards and cells are labeled 1 to 9, so we make sure that we only pass 1 to 9
-   assert!(0 < local_board && local_board < 10);
-   assert!(0 < cell && cell < 10);
+#[derive(Clone, Copy)]
+struct LocalBoard {
+   board: [Piece; 9],
+   claimer: Option<Piece>,
+}
 
-   // to target the coordinates of the target cell we do it in 2 steps:
-   // 1. go to the top-left of the target local board
-   // 2. offset the cursor to go on the right cell
-   let (corner_x, corner_y) = board_coordinates(local_board);
-   let (offset_x, offset_y) = board_coordinates(cell);
+impl LocalBoard {
+   fn new() -> LocalBoard {
+      LocalBoard {
+         board: [Piece::BLANK; 9],
+         claimer: None,
+      }
+   }
 
-   // then write the piece char at the target
-   write!(
-      stdout,
-      "{move}{piece}",
-      move = cursor::Goto(
-         X_CORNERS[corner_x] + X_OFFSETS[offset_x],
-         Y_CORNERS[corner_y] + Y_OFFSETS[offset_y]
-      ),
-      piece = piece
-   )
-   .unwrap();
+   // find if there was a win, or a draw
+   fn get_results(&self) -> Option<Piece> {
+      let win = WIN_STATES.iter().find(|win_state| {
+         let [a, b, c] = win_state;
+         return self.board[*a] != Piece::BLANK
+            && self.board[*a] == self.board[*b]
+            && self.board[*b] == self.board[*c];
+      });
+
+      match win {
+         Some(x) => Some(self.board[x[0]]),
+         None => {
+            let draw = self.board.iter().all(|x| *x != Piece::BLANK);
+            if draw {
+               return Some(Piece::BLANK);
+            }
+            return None;
+         }
+      }
+   }
+
+   fn place_piece(&mut self, cell: usize, piece: Piece) {
+      // validate the cell is vacant
+      if self.board[cell] != Piece::BLANK {
+         panic!()
+      }
+
+      self.board[cell] = piece;
+
+      self.claimer = self.get_results()
+   }
+}
+
+struct Game {
+   local_boards: [LocalBoard; 9],
+   current_board: Option<usize>,
+   turn: Piece,
+}
+
+// converts board number into 2D coords (x, y)
+// 0 is (0, 0), 8 is (2, 2)
+fn board_coordinates(cell: usize) -> (usize, usize) {
+   assert!(cell < 9);
+   (cell % 3, cell / 3)
+}
+
+fn piece_to_char(piece: Piece) -> char {
+   match piece {
+      Piece::X => 'X',
+      Piece::O => 'O',
+      Piece::BLANK => ' ',
+   }
+}
+
+impl Game {
+   fn new() -> Game {
+      Game {
+         local_boards: [LocalBoard::new(); 9],
+         current_board: None,
+         turn: Piece::X,
+      }
+   }
+
+   fn switch_turns(&mut self) {
+      self.turn = match self.turn {
+         Piece::X => Piece::O,
+         Piece::O => Piece::X,
+         _ => panic!(),
+      }
+   }
+
+   fn make_move(&mut self, local_board: usize, cell: usize) {
+      // validate the move is legal before proceeding
+      assert!(local_board < 9);
+      assert!(cell < 9);
+
+      match self.current_board {
+         Some(n) => assert!(local_board == n),
+         None => {}
+      }
+
+      match self.local_boards[local_board].claimer {
+         Some(_) => panic!(),
+         None => {}
+      }
+
+      // update the target cell
+      self.local_boards[local_board].place_piece(cell, self.turn);
+
+      // update the current_board
+      // - if the next local_board is claimed, set it to None, which means the player can play anywhere
+      self.current_board = match self.local_boards[cell].claimer {
+         Some(_) => None,
+         None => Some(cell),
+      };
+
+      self.switch_turns();
+   }
+
+   // change a piece of the board in the terminal display
+   // pass in which local_board (from 1 to 9) has the cell that needs to be changed
+   // then do the same for the cell number
+   fn draw_piece(
+      &self,
+      stdout: &mut termion::raw::RawTerminal<std::io::Stdout>,
+      piece: Piece,
+      local_board: usize,
+      cell: usize,
+   ) {
+      // the boards and cells indices only go up to 8
+      assert!(local_board < 9);
+      assert!(cell < 9);
+
+      // to target the coordinates of the target cell we do it in 2 steps:
+      // 1. go to the top-left of the target local board
+      // 2. offset the cursor to go on the right cell
+      let (corner_x, corner_y) = board_coordinates(local_board);
+      let (offset_x, offset_y) = board_coordinates(cell);
+
+      // then write the piece char at the target
+      write!(
+         stdout,
+         "{move}{piece}",
+         move = cursor::Goto(
+            X_CORNERS[corner_x] + X_OFFSETS[offset_x],
+            Y_CORNERS[corner_y] + Y_OFFSETS[offset_y]
+         ),
+         piece = piece_to_char(piece)
+      )
+      .unwrap();
+   }
+
+   // re-draw the whole board
+   fn draw_board(&self, stdout: &mut termion::raw::RawTerminal<std::io::Stdout>) {
+      write!(
+         stdout,
+         "{clear}{move}{board}",
+         clear = clear::All,
+         move = cursor::Goto(1, 1),
+         board = BOARD_DISPLAY
+      )
+      .unwrap();
+
+      for i in 0..=8 {
+         for j in 0..=8 {
+            self.draw_piece(stdout, self.local_boards[i].board[j], i, j)
+         }
+      }
+
+      stdout.flush().unwrap();
+   }
 }
 
 fn main() {
    // Enter raw mode.
    let mut stdout = stdout().into_raw_mode().unwrap();
 
-   write!(
-      stdout,
-      "{clear}{move}{board}",
-      clear = clear::All,
-      move = cursor::Goto(1, 1),
-      board = BOARD_DISPLAY
-   )
-   .unwrap();
+   let mut game = Game::new();
 
-   stdout.flush().unwrap();
+   game.make_move(0, 4);
+   game.make_move(4, 1);
+   game.make_move(1, 4);
+   game.make_move(4, 2);
+   game.make_move(2, 4);
+   game.make_move(4, 0);
 
-   set_piece(&mut stdout, 'O', 9, 1);
+   match game.local_boards[4].claimer {
+      Some(Piece::O) => {}
+      _ => panic!(),
+   }
+
+   game.draw_board(&mut stdout);
 }
