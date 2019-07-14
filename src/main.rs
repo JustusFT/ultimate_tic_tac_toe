@@ -1,9 +1,10 @@
-use std::io::{stdout, Write};
+use std::io::{stdin, stdout, Write};
 use termion::clear;
 use termion::cursor;
 use termion::raw::IntoRawMode;
 
-const BOARD_DISPLAY: &'static str = "   │   │    ┃    │   │    ┃    │   │   \r
+const BOARD_DISPLAY: &'static str = "   \
+   │   │    ┃    │   │    ┃    │   │   \r
 ───┼───┼─── ┃ ───┼───┼─── ┃ ───┼───┼───\r
    │   │    ┃    │   │    ┃    │   │   \r
 ───┼───┼─── ┃ ───┼───┼─── ┃ ───┼───┼───\r
@@ -22,19 +23,26 @@ const BOARD_DISPLAY: &'static str = "   │   │    ┃    │   │    ┃    
    │   │    ┃    │   │    ┃    │   │   \r
 ";
 
+// these mark the coordinates where the top-left cell of a local board is located from the BOARD_DISPLAY
 const X_CORNERS: [u16; 3] = [2, 16, 30];
 const Y_CORNERS: [u16; 3] = [1, 7, 13];
+// these mark the distance to the other cells of the local board, starting from the top left cell of the local board
 const X_OFFSETS: [u16; 3] = [0, 4, 8];
 const Y_OFFSETS: [u16; 3] = [0, 2, 4];
 
 // converts board number into 2D coords (x, y)
 // 1 is (0, 0), 9 is (2, 2)
 fn board_coordinates(cell: usize) -> (usize, usize) {
+   assert!(0 < cell && cell < 10);
    ((cell - 1) % 3, (cell - 1) / 3)
 }
 
-fn place_piece(
+// change a piece of the board in the terminal display
+// pass in which local_board (from 1 to 9) has the cell that needs to be changed
+// then do the same for the cell number
+fn set_piece(
    stdout: &mut termion::raw::RawTerminal<std::io::Stdout>,
+   piece: char,
    local_board: usize,
    cell: usize,
 ) {
@@ -51,11 +59,12 @@ fn place_piece(
    // then write the piece char at the target
    write!(
       stdout,
-      "{}X",
-      cursor::Goto(
+      "{move}{piece}",
+      move = cursor::Goto(
          X_CORNERS[corner_x] + X_OFFSETS[offset_x],
          Y_CORNERS[corner_y] + Y_OFFSETS[offset_y]
-      )
+      ),
+      piece = piece
    )
    .unwrap();
 }
@@ -73,7 +82,7 @@ fn main() {
    )
    .unwrap();
 
-   place_piece(&mut stdout, 9, 1);
-
    stdout.flush().unwrap();
+
+   set_piece(&mut stdout, 'O', 9, 1);
 }
