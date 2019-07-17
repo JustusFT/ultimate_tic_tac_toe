@@ -1,6 +1,10 @@
-use std::io::{stdout, Write};
+use rustyline::error::ReadlineError;
+use rustyline::Editor;
+use std::io::{stdin, stdout, Write};
 use termion::clear;
 use termion::cursor;
+use termion::event::Key;
+use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 
 const WIN_STATES: [[usize; 3]; 8] = [
@@ -211,7 +215,49 @@ impl Game {
          }
       }
 
+      // move the cursor to the bottom
+      write!(stdout, "\r\n").unwrap();
+
       stdout.flush().unwrap();
+   }
+
+   // request input for next move
+   fn request_user_move(&mut self) {
+      let mut rl = Editor::<()>::new();
+      let current_board_index: usize;
+
+      match self.current_board {
+         Some(x) => {
+            println!("\rCurrent board: {}", x);
+            current_board_index = x;
+         }
+         None => {
+            print!("\rInput board #");
+            let readline = rl.readline("> ");
+            match readline {
+               Ok(line) => {
+                  current_board_index = line.parse::<usize>().unwrap();
+               }
+               Err(err) => {
+                  println!("Error: {:?}", err);
+                  panic!();
+               }
+            }
+         }
+      };
+
+      print!("\rInput cell #");
+      let readline = rl.readline("> ");
+      match readline {
+         Ok(line) => {
+            let n = line.parse::<usize>().unwrap();
+            self.make_move(current_board_index, n);
+         }
+         Err(err) => {
+            println!("Error: {:?}", err);
+            panic!();
+         }
+      }
    }
 }
 
@@ -221,17 +267,9 @@ fn main() {
 
    let mut game = Game::new();
 
-   game.make_move(0, 4);
-   game.make_move(4, 1);
-   game.make_move(1, 4);
-   game.make_move(4, 2);
-   game.make_move(2, 4);
-   game.make_move(4, 0);
+   loop {
+      game.draw_board(&mut stdout);
 
-   match game.local_boards[4].claimer {
-      Some(Piece::O) => {}
-      _ => panic!(),
+      game.request_user_move();
    }
-
-   game.draw_board(&mut stdout);
 }
