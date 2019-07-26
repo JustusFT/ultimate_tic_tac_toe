@@ -1,10 +1,17 @@
-use rustyline::error::ReadlineError;
+// use rustyline::error::ReadlineError;
+// use rustyline::Editor;
+// use std::cmp;
+// use std::io::{stdin, stdout, Write};
+// use termion::clear;
+// use termion::cursor;
+// use termion::event::Key;
+// use termion::input::TermRead;
+// use termion::raw::IntoRawMode;
+
 use rustyline::Editor;
-use std::io::{stdin, stdout, Write};
+use std::io::{stdout, Write};
 use termion::clear;
 use termion::cursor;
-use termion::event::Key;
-use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 
 const WIN_STATES: [[usize; 3]; 8] = [
@@ -50,6 +57,13 @@ enum Piece {
    X,
    O,
    BLANK,
+}
+
+enum Potential {
+   X,
+   O,
+   BOTH,
+   NEITHER,
 }
 
 #[derive(Clone, Copy)]
@@ -259,6 +273,145 @@ impl Game {
          }
       }
    }
+
+   fn winner(&self) -> Option<Piece> {
+      return None;
+   }
+
+   fn local_row_potential(&self, local_board_index: usize, win_state: &[usize; 3]) -> Potential {
+      let has_x = win_state
+         .iter()
+         .any(|x| self.local_boards[local_board_index].board[*x] == Piece::X);
+
+      let has_o = win_state
+         .iter()
+         .any(|x| self.local_boards[local_board_index].board[*x] == Piece::O);
+
+      if has_x && has_o {
+         return Potential::BOTH;
+      } else if has_x {
+         return Potential::X;
+      } else if has_o {
+         return Potential::O;
+      } else {
+         return Potential::NEITHER;
+      }
+   }
+
+   fn evaluate_local_row(&self, local_board_index: usize, win_state: &[usize; 3]) -> i16 {
+      // should be a bit different than global row, rows that sending anywhere upon solve are less valuable
+      let local_board = self.local_boards[local_board_index];
+      let potential = self.local_row_potential(local_board_index, win_state);
+      match potential {
+         Potential::NEITHER => {
+            // No score since neither can win this row. It doesn't matter
+            return 0;
+         }
+         Potential::BOTH => {
+            // only thing you should care about is if this row has some cells that give the other player the 'send anywhere' ability
+            // TODO:
+            return 0;
+         }
+         Potential::X => {
+            let mut score = 0;
+            win_state.iter().for_each(|x| {
+               if local_board.board[*x] == Piece::X {
+                  score += 1;
+               }
+            });
+            return score;
+         }
+         Potential::O => {
+            let mut score = 0;
+            win_state.iter().for_each(|x| {
+               if local_board.board[*x] == Piece::O {
+                  score -= 1;
+               }
+            });
+            return score;
+         }
+      }
+   }
+
+   fn evaluate_local_board(&self, local_board_index: usize) -> i16 {
+      let local_board = self.local_boards[local_board_index];
+      match local_board.claimer {
+         Some(Piece::X) => {
+            return 10;
+         }
+         Some(Piece::O) => {
+            return -10;
+         }
+         _ => {
+            let mut score = 0;
+            WIN_STATES.iter().for_each(|win_state| {
+               score += self.evaluate_local_row(local_board_index, win_state);
+            });
+            return score;
+         }
+      }
+   }
+
+   // returns whether X, O, both, or neither can claim this row
+   // maybe add a new enum for this function, don't use Option<Piece>
+   fn row_potential(&self, win_state: &[usize; 3]) -> Potential {
+      let has_x = win_state
+         .iter()
+         .any(|x| self.local_boards[*x].claimer == Some(Piece::X));
+
+      let has_o = win_state
+         .iter()
+         .any(|x| self.local_boards[*x].claimer == Some(Piece::O));
+
+      if has_x && has_o {
+         return Potential::NEITHER;
+      } else if has_x {
+         return Potential::X;
+      } else if has_o {
+         return Potential::O;
+      } else {
+         return Potential::BOTH;
+      }
+   }
+
+   // gets the heuristic value of the row
+   fn evaluate_row(&self, win_state: &[usize; 3]) -> i16 {
+      let potential = self.row_potential(win_state);
+      match potential {
+         Potential::NEITHER => {
+            // No score since neither can win this row. It doesn't matter
+            return 0;
+         }
+         _ => {
+            let mut score = 0;
+            win_state.iter().for_each(|x| {
+               score += self.evaluate_local_board(*x);
+            });
+            return score;
+         }
+      }
+   }
+
+   // gets the heuristic value of the board
+   fn evaluate(&self) -> i16 {
+      match self.winner() {
+         Some(Piece::X) => {
+            return 1000;
+         }
+         Some(Piece::O) => {
+            return -1000;
+         }
+         _ => {}
+      }
+
+      let mut score: i16 = 0;
+
+      WIN_STATES.iter().for_each(|win_triple| {
+         score += self.evaluate_row(win_triple);
+      });
+
+      return score;
+   }
 }
 
 fn main() {
@@ -269,6 +422,8 @@ fn main() {
 
    loop {
       game.draw_board(&mut stdout);
+
+      println!("\r{}", game.evaluate());
 
       game.request_user_move();
    }
