@@ -1,14 +1,5 @@
-// use rustyline::error::ReadlineError;
-// use rustyline::Editor;
-// use std::cmp;
-// use std::io::{stdin, stdout, Write};
-// use termion::clear;
-// use termion::cursor;
-// use termion::event::Key;
-// use termion::input::TermRead;
-// use termion::raw::IntoRawMode;
-
 use rustyline::Editor;
+use std::cmp;
 use std::io::{stdout, Write};
 use termion::clear;
 use termion::cursor;
@@ -64,6 +55,14 @@ enum Potential {
    O,
    BOTH,
    NEITHER,
+}
+
+#[derive(PartialEq)]
+enum GameWinState {
+   X,
+   O,
+   DRAW,
+   ONGOING,
 }
 
 #[derive(Clone, Copy)]
@@ -238,44 +237,69 @@ impl Game {
    // request input for next move
    fn request_user_move(&mut self) {
       let mut rl = Editor::<()>::new();
-      let current_board_index: usize;
+      let mut current_board_index: usize;
 
       match self.current_board {
          Some(x) => {
             println!("\rCurrent board: {}", x);
             current_board_index = x;
          }
-         None => {
+         None => loop {
             print!("\rInput board #");
             let readline = rl.readline("> ");
             match readline {
                Ok(line) => {
                   current_board_index = line.parse::<usize>().unwrap();
+                  if self.local_boards[current_board_index].claimer == None {
+                     break;
+                  }
                }
-               Err(err) => {
-                  println!("Error: {:?}", err);
-                  panic!();
-               }
+               _ => {}
             }
-         }
+         },
       };
 
-      print!("\rInput cell #");
-      let readline = rl.readline("> ");
-      match readline {
-         Ok(line) => {
-            let n = line.parse::<usize>().unwrap();
-            self.make_move(current_board_index, n);
-         }
-         Err(err) => {
-            println!("Error: {:?}", err);
-            panic!();
+      loop {
+         print!("\rInput cell #");
+         let readline = rl.readline("> ");
+         match readline {
+            Ok(line) => {
+               let n = line.parse::<usize>().unwrap();
+               if self.local_boards[current_board_index].board[n] == Piece::BLANK {
+                  self.make_move(current_board_index, n);
+                  break;
+               }
+            }
+            _ => {}
          }
       }
    }
 
-   fn winner(&self) -> Option<Piece> {
-      return None;
+   fn get_win_state(&self) -> GameWinState {
+      // check for 3 in a rows
+      for i in 0..WIN_STATES.len() {
+         let [a, b, c] = WIN_STATES[i];
+         if self.local_boards[a].claimer != Some(Piece::BLANK)
+            && self.local_boards[a].claimer == self.local_boards[b].claimer
+            && self.local_boards[b].claimer == self.local_boards[c].claimer
+         {
+            match self.local_boards[a].claimer {
+               Some(Piece::X) => {
+                  return GameWinState::X;
+               }
+               Some(Piece::O) => {
+                  return GameWinState::O;
+               }
+               _ => {}
+            }
+         }
+      }
+      // check for draws
+      if self.local_boards.iter().all(|x| x.claimer != None) {
+         return GameWinState::DRAW;
+      }
+      // otherwise, it's an ongoing game
+      return GameWinState::ONGOING;
    }
 
    fn local_row_potential(&self, local_board_index: usize, win_state: &[usize; 3]) -> Potential {
@@ -337,10 +361,10 @@ impl Game {
       let local_board = self.local_boards[local_board_index];
       match local_board.claimer {
          Some(Piece::X) => {
-            return 10;
+            return 20;
          }
          Some(Piece::O) => {
-            return -10;
+            return -20;
          }
          _ => {
             let mut score = 0;
@@ -374,7 +398,7 @@ impl Game {
       }
    }
 
-   // gets the heuristic value of the row
+   // gets the heuristic value of the row10
    fn evaluate_row(&self, win_state: &[usize; 3]) -> i16 {
       let potential = self.row_potential(win_state);
       match potential {
@@ -394,12 +418,15 @@ impl Game {
 
    // gets the heuristic value of the board
    fn evaluate(&self) -> i16 {
-      match self.winner() {
-         Some(Piece::X) => {
+      match self.get_win_state() {
+         GameWinState::X => {
             return 1000;
          }
-         Some(Piece::O) => {
+         GameWinState::O => {
             return -1000;
+         }
+         GameWinState::DRAW => {
+            return 0;
          }
          _ => {}
       }
