@@ -1,4 +1,5 @@
 use rustyline::Editor;
+use std::cmp;
 use std::io::{stdout, Write};
 use termion::clear;
 use termion::cursor;
@@ -455,7 +456,9 @@ impl Game {
    fn negamax(
       &mut self,
       depth: i16,
-      color: i16
+      mut alpha: i16,
+      beta: i16,
+      color: i16,
    ) -> (Option<usize>, Option<usize>, i16) {
       if depth == 0 || self.get_win_state() != GameWinState::ONGOING {
          let score = (color * self.evaluate()) - depth;
@@ -477,8 +480,7 @@ impl Game {
                if x == Piece::BLANK {
                   // legal move!
                   self.make_move(current_board, i);
-                  let (_, _, next_score) =
-                     self.negamax(depth - 1, -color);
+                  let (_, _, next_score) = self.negamax(depth - 1, -beta, -alpha, -color);
                   if -next_score > best_score {
                      best_score = -next_score;
                      best_move = Some(i);
@@ -486,6 +488,10 @@ impl Game {
                   self.remove_move(current_board, i);
                   self.local_boards[current_board].claimer = original_claimer;
                   self.current_board = original_board;
+                  alpha = cmp::max(alpha, -next_score);
+                  if alpha >= beta {
+                     break;
+                  }
                }
             }
          }
@@ -502,8 +508,7 @@ impl Game {
                   if x == Piece::BLANK {
                      // legal move!
                      self.make_move(current_board, i);
-                     let (_, _, next_score) =
-                        self.negamax(depth - 1, -color);
+                     let (_, _, next_score) = self.negamax(depth - 1, -beta, -alpha, -color);
                      if -next_score > best_score {
                         best_move_a = Some(current_board);
                         best_score = -next_score;
@@ -512,6 +517,10 @@ impl Game {
                      self.remove_move(current_board, i);
                      self.local_boards[current_board].claimer = original_claimer;
                      self.current_board = original_board;
+                     alpha = cmp::max(alpha, -next_score);
+                     if alpha >= beta {
+                        break;
+                     }
                   }
                }
             }
@@ -533,7 +542,7 @@ fn main() {
       println!("\r{}", game.evaluate());
 
       game.request_user_move();
-      let (best_move_a, best_move, _) = game.negamax(4, -1);
+      let (best_move_a, best_move, _) = game.negamax(8, -3000, 3000, -1);
 
       game.make_move(best_move_a.unwrap(), best_move.unwrap());
    }
