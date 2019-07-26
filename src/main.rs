@@ -1,5 +1,4 @@
 use rustyline::Editor;
-use std::cmp;
 use std::io::{stdout, Write};
 use termion::clear;
 use termion::cursor;
@@ -174,6 +173,19 @@ impl Game {
          Some(_) => None,
          None => Some(cell),
       };
+
+      self.switch_turns();
+   }
+
+   // remove a piece and switch turns
+   // it cant reverse claimed state or current local board, do that manually
+   fn remove_move(&mut self, local_board: usize, cell: usize) {
+      // validate the move is legal before proceeding
+      assert!(local_board < 9);
+      assert!(cell < 9);
+
+      // update the target cell
+      self.local_boards[local_board].board[cell] = Piece::BLANK;
 
       self.switch_turns();
    }
@@ -439,6 +451,76 @@ impl Game {
 
       return score;
    }
+
+   fn negamax(
+      &mut self,
+      depth: i16,
+      color: i16,
+      last_move_a: Option<usize>,
+      last_move: Option<usize>,
+   ) -> (Option<usize>, Option<usize>, i16) {
+      if depth == 0 || self.get_win_state() != GameWinState::ONGOING {
+         let score = (color * self.evaluate()) - depth;
+         return (last_move_a, last_move, score);
+      }
+      let mut best_move_a = None;
+      let mut best_move = None;
+      let mut best_score = -2000;
+
+      let original_board = self.current_board;
+
+      // loop through legal moves
+      match self.current_board {
+         Some(current_board) => {
+            best_move_a = Some(current_board);
+            let original_claimer = self.local_boards[current_board].claimer;
+            for i in 0..9 {
+               let x = self.local_boards[current_board].board[i];
+               if x == Piece::BLANK {
+                  // legal move!
+                  self.make_move(current_board, i);
+                  let (_, _, next_score) =
+                     self.negamax(depth - 1, -color, Some(current_board), Some(i));
+                  if -next_score > best_score {
+                     best_score = -next_score;
+                     best_move = Some(i);
+                  }
+                  self.remove_move(current_board, i);
+                  self.local_boards[current_board].claimer = original_claimer;
+                  self.current_board = original_board;
+               }
+            }
+         }
+         // if can go anywhere then loop through each unclaimed board
+         None => {
+            for current_board in 0..9 {
+               if self.local_boards[current_board].claimer != None {
+                  continue;
+               }
+               // TODO: DRY it up with above
+               let original_claimer = self.local_boards[current_board].claimer;
+               for i in 0..9 {
+                  let x = self.local_boards[current_board].board[i];
+                  if x == Piece::BLANK {
+                     // legal move!
+                     self.make_move(current_board, i);
+                     let (_, _, next_score) =
+                        self.negamax(depth - 1, -color, Some(current_board), Some(i));
+                     if -next_score > best_score {
+                        best_move_a = Some(current_board);
+                        best_score = -next_score;
+                        best_move = Some(i);
+                     }
+                     self.remove_move(current_board, i);
+                     self.local_boards[current_board].claimer = original_claimer;
+                     self.current_board = original_board;
+                  }
+               }
+            }
+         }
+      }
+      return (best_move_a, best_move, best_score);
+   }
 }
 
 fn main() {
@@ -453,5 +535,8 @@ fn main() {
       println!("\r{}", game.evaluate());
 
       game.request_user_move();
+      let (best_move_a, best_move, _) = game.negamax(4, -1, None, None);
+
+      game.make_move(best_move_a.unwrap(), best_move.unwrap());
    }
 }
