@@ -455,13 +455,11 @@ impl Game {
    fn negamax(
       &mut self,
       depth: i16,
-      color: i16,
-      last_move_a: Option<usize>,
-      last_move: Option<usize>,
+      color: i16
    ) -> (Option<usize>, Option<usize>, i16) {
       if depth == 0 || self.get_win_state() != GameWinState::ONGOING {
          let score = (color * self.evaluate()) - depth;
-         return (last_move_a, last_move, score);
+         return (None, None, score);
       }
       let mut best_move_a = None;
       let mut best_move = None;
@@ -480,7 +478,7 @@ impl Game {
                   // legal move!
                   self.make_move(current_board, i);
                   let (_, _, next_score) =
-                     self.negamax(depth - 1, -color, Some(current_board), Some(i));
+                     self.negamax(depth - 1, -color);
                   if -next_score > best_score {
                      best_score = -next_score;
                      best_move = Some(i);
@@ -505,7 +503,7 @@ impl Game {
                      // legal move!
                      self.make_move(current_board, i);
                      let (_, _, next_score) =
-                        self.negamax(depth - 1, -color, Some(current_board), Some(i));
+                        self.negamax(depth - 1, -color);
                      if -next_score > best_score {
                         best_move_a = Some(current_board);
                         best_score = -next_score;
@@ -535,7 +533,7 @@ fn main() {
       println!("\r{}", game.evaluate());
 
       game.request_user_move();
-      let (best_move_a, best_move, _) = game.negamax(4, -1, None, None);
+      let (best_move_a, best_move, _) = game.negamax(4, -1);
 
       game.make_move(best_move_a.unwrap(), best_move.unwrap());
    }
