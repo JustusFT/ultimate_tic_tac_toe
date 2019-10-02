@@ -1,3 +1,12 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+function App() {
+  return <div>Hello world</div>;
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));
+
 function range(start, length) {
   return Array.from({ length }, (x, i) => i + start);
 }
