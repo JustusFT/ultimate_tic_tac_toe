@@ -82,7 +82,7 @@ impl LocalBoard {
    }
 
    // we use this to be able to directly read the board data on the javascript side
-   pub fn get_board_pointer(&self) -> *const Piece {
+   fn get_board_pointer(&self) -> *const Piece {
       self.board.as_ptr()
    }
 
@@ -163,7 +163,7 @@ impl Game {
       }
    }
 
-   fn make_move(&mut self, local_board: usize, cell: usize) {
+   pub fn make_move(&mut self, local_board: usize, cell: usize) {
       // validate the move is legal before proceeding
       assert!(local_board < 9);
       assert!(cell < 9);
@@ -189,6 +189,11 @@ impl Game {
       };
 
       self.switch_turns();
+   }
+
+   pub fn cpu_move(&mut self, depth: i16) {
+      let (best_move_a, best_move, _) = self.negamax(depth, -3000, 3000, -1);
+      self.make_move(best_move_a.unwrap(), best_move.unwrap());
    }
 
    // remove a piece and switch turns
