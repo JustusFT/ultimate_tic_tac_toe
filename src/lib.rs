@@ -46,10 +46,10 @@ const Y_OFFSETS: [u16; 3] = [0, 2, 4];
 
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq)]
-enum Piece {
+pub enum Piece {
+   BLANK,
    X,
    O,
-   BLANK,
 }
 
 enum Potential {
@@ -120,7 +120,7 @@ impl LocalBoard {
 }
 
 #[wasm_bindgen]
-struct Game {
+pub struct Game {
    local_boards: [LocalBoard; 9],
    current_board: Option<usize>,
    turn: Piece,

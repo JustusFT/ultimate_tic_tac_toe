@@ -1,7 +1,4 @@
-Promise.all([
-  import('ultimate_tic_tac_toe'),
-  import('ultimate_tic_tac_toe/ultimate_tic_tac_toe_bg')
-]).then(values => {
+Promise.all([import('../pkg'), import('../pkg/index_bg.wasm')]).then(values => {
   const [{ Game }, { memory }] = values;
 
   const game = Game.new();
