@@ -13,7 +13,7 @@ export default function GlobalBoard({ localBoards }) {
   return (
     <Grid>
       {localBoards.map((board, boardIndex) => (
-        <LocalBoard boardIndex={boardIndex} cells={board} />
+        <LocalBoard boardIndex={boardIndex} data={board} />
       ))}
     </Grid>
   );

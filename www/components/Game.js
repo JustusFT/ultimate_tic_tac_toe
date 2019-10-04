@@ -1,53 +1,53 @@
 import React from 'react';
 import GlobalBoard from './GlobalBoard';
 
-function range(start, length) {
-  return Array.from({ length }, (x, i) => i + start);
-}
-
 export const GameContext = React.createContext(null);
 
 export default class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      initialized: false
+      game: null
     };
-    Promise.all([import('../../pkg'), import('../../pkg/index_bg.wasm')]).then(
-      values => {
-        const [{ Game: GameObj }, { memory }] = values;
-        this.game = GameObj.new();
-        this.memory = memory;
-        // store the pointers to the game boards so we can read directly from wasm memory
-        this.boardPtrs = range(0, 9).map(x => this.game.get_board_pointer(x));
-        this.updateBoard();
-        this.setState({
-          initialized: true
-        });
-      }
-    );
   }
 
-  updateBoard = () => {
-    this.setState({
-      board: this.boardPtrs.map(
-        ptr => new Uint8Array(this.memory.buffer, ptr, 9)
-      )
+  makeMove = (localBoard, cellBoard) => {
+    this.gameWorker.postMessage({
+      type: 'PLAYER_MOVE',
+      payload: [localBoard, cellBoard]
+    });
+
+    this.gameWorker.postMessage({
+      type: 'CPU_MOVE'
     });
   };
 
-  makeMove = (localBoard, cellBoard) => {
-    this.game.make_move(localBoard, cellBoard);
-    this.updateBoard();
-  };
+  componentDidMount() {
+    this.gameWorker = new Worker('../workers/game.worker.js', {
+      name: 'game',
+      type: 'module'
+    });
+
+    this.gameWorker.onmessage = event => {
+      const { data } = event;
+      switch (data.type) {
+        case 'UPDATE_STATE': {
+          this.setState({
+            game: data.payload
+          });
+        }
+      }
+    };
+  }
 
   render() {
-    return (
-      this.state.initialized && (
-        <GameContext.Provider value={{ makeMove: this.makeMove }}>
-          <GlobalBoard localBoards={this.state.board} />
-        </GameContext.Provider>
-      )
+    const { game } = this.state;
+    return this.state.game ? (
+      <GameContext.Provider value={{ makeMove: this.makeMove }}>
+        <GlobalBoard localBoards={game.local_boards} />
+      </GameContext.Provider>
+    ) : (
+      <div>Loading...</div>
     );
   }
 }

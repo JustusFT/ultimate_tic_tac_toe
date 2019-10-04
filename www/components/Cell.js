@@ -10,6 +10,12 @@ const CellContainer = styled.div`
   ${props => generateBorders(props.index, '1px solid #aaa')}
 `;
 
+const pieceMap = {
+  BLANK: '_',
+  X: 'X',
+  O: 'O'
+};
+
 export default function Cell({ piece, boardIndex, cellIndex }) {
   const { makeMove } = useContext(GameContext);
 
@@ -20,7 +26,7 @@ export default function Cell({ piece, boardIndex, cellIndex }) {
         makeMove(boardIndex, cellIndex);
       }}
     >
-      {piece}
+      {pieceMap[piece]}
     </CellContainer>
   );
 }

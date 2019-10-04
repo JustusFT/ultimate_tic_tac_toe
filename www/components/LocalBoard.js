@@ -10,10 +10,10 @@ const Grid = styled.div`
   padding: 8px;
 `;
 
-export default function LocalBoard({ cells, boardIndex }) {
+export default function LocalBoard({ data, boardIndex }) {
   return (
     <Grid index={boardIndex}>
-      {Array.from(cells).map((cell, cellIndex) => (
+      {data.board.map((cell, cellIndex) => (
         <Cell boardIndex={boardIndex} cellIndex={cellIndex} piece={cell} />
       ))}
     </Grid>

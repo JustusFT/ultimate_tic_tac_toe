@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
+const WorkerPlugin = require('worker-plugin');
 
 module.exports = {
   mode: 'development',
@@ -16,6 +17,9 @@ module.exports = {
     }),
     new WasmPackPlugin({
       crateDirectory: path.resolve(__dirname, '..')
+    }),
+    new WorkerPlugin({
+      globalObject: 'self'
     })
   ],
   module: {

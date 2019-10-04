@@ -6,6 +6,9 @@ use std::cmp;
 // use termion::raw::IntoRawMode;
 use wasm_bindgen::prelude::*;
 
+#[macro_use]
+extern crate serde_derive;
+
 const WIN_STATES: [[usize; 3]; 8] = [
    [0, 1, 2],
    [3, 4, 5],
@@ -44,8 +47,7 @@ const Y_CORNERS: [u16; 3] = [1, 7, 13];
 const X_OFFSETS: [u16; 3] = [0, 4, 8];
 const Y_OFFSETS: [u16; 3] = [0, 2, 4];
 
-#[repr(u8)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Serialize)]
 pub enum Piece {
    BLANK,
    X,
@@ -67,7 +69,7 @@ enum GameWinState {
    ONGOING,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Serialize)]
 struct LocalBoard {
    board: [Piece; 9],
    claimer: Option<Piece>,
@@ -120,6 +122,7 @@ impl LocalBoard {
 }
 
 #[wasm_bindgen]
+#[derive(Serialize)]
 pub struct Game {
    local_boards: [LocalBoard; 9],
    current_board: Option<usize>,
@@ -149,6 +152,10 @@ impl Game {
          current_board: None,
          turn: Piece::X,
       }
+   }
+
+   pub fn get_state(&self) -> JsValue {
+      JsValue::from_serde(&self).unwrap()
    }
 
    pub fn get_board_pointer(&self, index: usize) -> *const Piece {
