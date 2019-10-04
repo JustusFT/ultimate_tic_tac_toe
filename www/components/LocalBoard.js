@@ -3,12 +3,14 @@ import styled from 'styled-components';
 import generateBorders from '../utils/generateBorders';
 import Cell from './Cell';
 import { GameContext } from './Game';
+import Piece from './Piece';
 
 const Grid = styled.div`
   height: 100%;
   box-sizing: border-box;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
   ${props => generateBorders(props.index, '2px solid #666')}
   padding: 8px;
   background-color: ${props => (props.active ? 'lightblue' : 'none')};
@@ -59,7 +61,9 @@ export default function LocalBoard({ data, boardIndex }) {
       </Layer>
       {data.claimer && (
         <Layer>
-          <ClaimerOverlay>{data.claimer}</ClaimerOverlay>
+          <ClaimerOverlay>
+            <Piece piece={data.claimer} />
+          </ClaimerOverlay>
         </Layer>
       )}
     </LayerContainer>

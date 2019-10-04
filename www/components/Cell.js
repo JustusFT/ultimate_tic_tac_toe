@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 import generateBorders from '../utils/generateBorders';
 import { GameContext } from './Game';
+import Piece from './Piece';
 
 const CellContainer = styled.div`
   display: inline-flex;
@@ -9,12 +10,6 @@ const CellContainer = styled.div`
   justify-content: center;
   ${props => generateBorders(props.index, '1px solid #aaa')}
 `;
-
-const pieceMap = {
-  BLANK: '_',
-  X: 'X',
-  O: 'O'
-};
 
 export default function Cell({ piece, boardIndex, cellIndex, active }) {
   const { makeMove } = useContext(GameContext);
@@ -29,7 +24,7 @@ export default function Cell({ piece, boardIndex, cellIndex, active }) {
         }
       }}
     >
-      {pieceMap[piece]}
+      <Piece piece={piece} />
     </CellContainer>
   );
 }
