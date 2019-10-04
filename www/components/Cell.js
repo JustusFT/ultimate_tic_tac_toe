@@ -16,14 +16,17 @@ const pieceMap = {
   O: 'O'
 };
 
-export default function Cell({ piece, boardIndex, cellIndex }) {
+export default function Cell({ piece, boardIndex, cellIndex, active }) {
   const { makeMove } = useContext(GameContext);
 
   return (
     <CellContainer
       index={cellIndex}
       onClick={() => {
-        makeMove(boardIndex, cellIndex);
+        // don't allow moves if the board is not active
+        if (active) {
+          makeMove(boardIndex, cellIndex);
+        }
       }}
     >
       {pieceMap[piece]}

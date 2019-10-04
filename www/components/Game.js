@@ -42,8 +42,9 @@ export default class Game extends React.Component {
 
   render() {
     const { game } = this.state;
-    return this.state.game ? (
-      <GameContext.Provider value={{ makeMove: this.makeMove }}>
+    return game ? (
+      <GameContext.Provider value={{ game, makeMove: this.makeMove }}>
+        {game.turn === 'X' ? 'Your turn' : 'CPU is thinking...'}
         <GlobalBoard localBoards={game.local_boards} />
       </GameContext.Provider>
     ) : (

@@ -19,14 +19,12 @@ import('../../pkg').then(({ Game }) => {
     const { data } = event;
     switch (data.type) {
       case 'PLAYER_MOVE': {
-        console.log('player');
         const [a, b] = data.payload;
         game.make_move(a, b);
         updateState(game);
         break;
       }
       case 'CPU_MOVE': {
-        console.log('cpu');
         game.cpu_move(5);
         updateState(game);
         break;
