@@ -127,6 +127,7 @@ pub struct Game {
    local_boards: [LocalBoard; 9],
    current_board: Option<usize>,
    turn: Piece,
+   winner: Option<Piece>,
 }
 
 // converts board number into 2D coords (x, y)
@@ -151,6 +152,7 @@ impl Game {
          local_boards: [LocalBoard::new(); 9],
          current_board: None,
          turn: Piece::X,
+         winner: None,
       }
    }
 
@@ -174,6 +176,7 @@ impl Game {
       // validate the move is legal before proceeding
       assert!(local_board < 9);
       assert!(cell < 9);
+      assert!(self.winner == None);
 
       match self.current_board {
          Some(n) => assert!(local_board == n),
@@ -195,6 +198,9 @@ impl Game {
          None => Some(cell),
       };
 
+      // update the winner status
+      self.update_win_state();
+
       self.switch_turns();
    }
 
@@ -204,7 +210,7 @@ impl Game {
    }
 
    // remove a piece and switch turns
-   // it cant reverse claimed state or current local board, do that manually
+   // it cant reverse claimed state, winner state, or current local board, do that manually
    fn remove_move(&mut self, local_board: usize, cell: usize) {
       // validate the move is legal before proceeding
       assert!(local_board < 9);
@@ -312,6 +318,27 @@ impl Game {
    //       }
    //    }
    // }
+
+   fn update_win_state(&mut self) {
+      // check for 3 in a rows
+      for i in 0..WIN_STATES.len() {
+         let [a, b, c] = WIN_STATES[i];
+         if self.local_boards[a].claimer != Some(Piece::BLANK)
+            && self.local_boards[a].claimer == self.local_boards[b].claimer
+            && self.local_boards[b].claimer == self.local_boards[c].claimer
+         {
+            match self.local_boards[a].claimer {
+               Some(Piece::X) => self.winner = Some(Piece::X),
+               Some(Piece::O) => self.winner = Some(Piece::O),
+               _ => {}
+            }
+         }
+      }
+      // check for draws
+      if self.local_boards.iter().all(|x| x.claimer != None) {
+         self.winner = Some(Piece::BLANK)
+      }
+   }
 
    fn get_win_state(&self) -> GameWinState {
       // check for 3 in a rows
@@ -456,14 +483,27 @@ impl Game {
 
    // gets the heuristic value of the board
    fn evaluate(&self) -> i16 {
-      match self.get_win_state() {
-         GameWinState::X => {
+      // match self.get_win_state() {
+      //    GameWinState::X => {
+      //       return 1000;
+      //    }
+      //    GameWinState::O => {
+      //       return -1000;
+      //    }
+      //    GameWinState::DRAW => {
+      //       return 0;
+      //    }
+      //    _ => {}
+      // }
+
+      match self.winner {
+         Some(Piece::X) => {
             return 1000;
          }
-         GameWinState::O => {
+         Some(Piece::O) => {
             return -1000;
          }
-         GameWinState::DRAW => {
+         Some(Piece::BLANK) => {
             return 0;
          }
          _ => {}
@@ -478,6 +518,10 @@ impl Game {
       return score;
    }
 
+   fn is_game_won(&self) -> bool {
+      self.winner != None
+   }
+
    fn negamax(
       &mut self,
       depth: i16,
@@ -485,7 +529,8 @@ impl Game {
       beta: i16,
       color: i16,
    ) -> (Option<usize>, Option<usize>, i16) {
-      if depth == 0 || self.get_win_state() != GameWinState::ONGOING {
+      // if depth == 0 || self.get_win_state() != GameWinState::ONGOING {
+      if depth == 0 || self.is_game_won() {
          let score = (color * self.evaluate()) - depth;
          return (None, None, score);
       }
@@ -494,6 +539,7 @@ impl Game {
       let mut best_score = -2000;
 
       let original_board = self.current_board;
+      let original_winner = self.winner;
 
       // loop through legal moves
       match self.current_board {
@@ -513,6 +559,7 @@ impl Game {
                   self.remove_move(current_board, i);
                   self.local_boards[current_board].claimer = original_claimer;
                   self.current_board = original_board;
+                  self.winner = original_winner;
                   alpha = cmp::max(alpha, -next_score);
                   if alpha >= beta {
                      break;
@@ -542,6 +589,7 @@ impl Game {
                      self.remove_move(current_board, i);
                      self.local_boards[current_board].claimer = original_claimer;
                      self.current_board = original_board;
+                     self.winner = original_winner;
                      alpha = cmp::max(alpha, -next_score);
                      if alpha >= beta {
                         break;

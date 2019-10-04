@@ -1,8 +1,19 @@
 import React from 'react';
 import GlobalBoard from './GlobalBoard';
 
-export const GameContext = React.createContext(null);
+import styled from 'styled-components';
 
+const GameContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const Spacer = styled.div`
+  height: 16px;
+`;
+
+export const GameContext = React.createContext(null);
 export default class Game extends React.Component {
   constructor(props) {
     super(props);
@@ -44,8 +55,13 @@ export default class Game extends React.Component {
     const { game } = this.state;
     return game ? (
       <GameContext.Provider value={{ game, makeMove: this.makeMove }}>
-        {game.turn === 'X' ? 'Your turn' : 'CPU is thinking...'}
-        <GlobalBoard localBoards={game.local_boards} />
+        <GameContainer>
+          <GlobalBoard localBoards={game.local_boards} />
+          <Spacer />
+          {game.turn === 'X' ? 'Your turn' : 'CPU is thinking...'}
+          <Spacer />
+          {game.winner ? `${game.winner} won the game` : 'Game ongoing'}
+        </GameContainer>
       </GameContext.Provider>
     ) : (
       <div>Loading...</div>
