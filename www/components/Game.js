@@ -13,6 +13,12 @@ const Spacer = styled.div`
   height: 16px;
 `;
 
+const Button = styled.span`
+  display: inline-block;
+  padding: 8px;
+  border: 2px solid #333;
+`;
+
 export const GameContext = React.createContext(null);
 export default class Game extends React.Component {
   constructor(props) {
@@ -23,6 +29,16 @@ export default class Game extends React.Component {
       type: null
     };
   }
+
+  resetState = () => {
+    this.gameWorker.postMessage({
+      type: 'RESET_GAME'
+    });
+    this.setState({
+      playerPiece: null,
+      type: null
+    });
+  };
 
   makeMove = (localBoard, cellBoard) => {
     if (this.state.winner) {
@@ -64,6 +80,8 @@ export default class Game extends React.Component {
         }
       }
     };
+
+    this.resetState();
   }
 
   render() {
@@ -72,43 +90,61 @@ export default class Game extends React.Component {
     if (!game) {
       return <div>Loading...</div>;
     } else if (!type) {
+      // Main menu
       return (
         <div>
-          <button onClick={() => this.setState({ type: 'VS_CPU' })}>
-            Play against the CPU
-          </button>
-          <button
-            onClick={() => {
-              this.setState({
-                type: 'LOCAL_2_PLAYER'
-                // playerPiece: 'X'
-              });
-            }}
-          >
-            Play local 2 players
-          </button>
+          <h1>Ultimate Tic Tac Toe</h1>
+          <div>
+            <Button onClick={() => this.setState({ type: 'VS_CPU' })}>
+              Play against the CPU
+            </Button>
+            <Button
+              onClick={() => {
+                this.setState({
+                  type: 'LOCAL_2_PLAYER'
+                  // playerPiece: 'X'
+                });
+              }}
+            >
+              Play local 2 players
+            </Button>
+          </div>
         </div>
       );
     } else if (type === 'VS_CPU' && !playerPiece) {
       return (
         <div>
-          <button onClick={() => this.setState({ playerPiece: 'X' })}>
+          <Button onClick={() => this.setState({ playerPiece: 'X' })}>
             Play X
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => {
               this.setState({ playerPiece: 'O' });
               this.cpuMove();
             }}
           >
             Play O
-          </button>
+          </Button>
+          <Button
+            onClick={() => {
+              this.resetState();
+            }}
+          >
+            Go back
+          </Button>
         </div>
       );
     } else {
       return (
         <GameContext.Provider value={{ game, makeMove: this.makeMove }}>
           <GameContainer>
+            <Button
+              onClick={() => {
+                this.resetState();
+              }}
+            >
+              Leave game
+            </Button>
             <GlobalBoard localBoards={game.local_boards} />
             <Spacer />
             {game.winner ? (

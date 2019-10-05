@@ -10,11 +10,18 @@ function updateState(game) {
 }
 
 import('../../pkg').then(({ Game }) => {
-  const game = Game.new();
+  let game = Game.new();
 
   onmessage = function(event) {
     const { data } = event;
     switch (data.type) {
+      case 'RESET_GAME': {
+        // throw out the old game and create a new instance
+        game.free();
+        game = Game.new();
+        updateState(game);
+        break;
+      }
       case 'PLAYER_MOVE': {
         const [a, b] = data.payload;
         game.make_move(a, b);
