@@ -19,7 +19,7 @@ export default class Game extends React.Component {
     super(props);
     this.state = {
       game: null,
-      playerPiece: 'X'
+      playerPiece: null
     };
   }
 
@@ -33,6 +33,10 @@ export default class Game extends React.Component {
     });
 
     // also do cpu move
+    this.cpuMove();
+  };
+
+  cpuMove = () => {
     if (this.state.winner) {
       return;
     }
@@ -50,13 +54,6 @@ export default class Game extends React.Component {
     this.gameWorker.onmessage = event => {
       const { data } = event;
       switch (data.type) {
-        case 'WORKER_READY': {
-          if (this.state.playerPiece === 'O') {
-            this.gameWorker.postMessage({
-              type: 'CPU_MOVE'
-            });
-          }
-        }
         case 'UPDATE_STATE': {
           this.setState({
             game: data.payload
@@ -69,18 +66,36 @@ export default class Game extends React.Component {
   render() {
     const { game, playerPiece } = this.state;
 
-    return game ? (
-      <GameContext.Provider value={{ game, makeMove: this.makeMove }}>
-        <GameContainer>
-          <GlobalBoard localBoards={game.local_boards} />
-          <Spacer />
-          {game.turn === playerPiece ? 'Your turn' : 'CPU is thinking...'}
-          <Spacer />
-          {game.winner ? `${game.winner} won the game` : 'Game ongoing'}
-        </GameContainer>
-      </GameContext.Provider>
-    ) : (
-      <div>Loading...</div>
-    );
+    if (!game) {
+      return <div>Loading...</div>;
+    } else if (!playerPiece) {
+      return (
+        <div>
+          <button onClick={() => this.setState({ playerPiece: 'X' })}>
+            Play X
+          </button>
+          <button
+            onClick={() => {
+              this.setState({ playerPiece: 'O' });
+              this.cpuMove();
+            }}
+          >
+            Play O
+          </button>
+        </div>
+      );
+    } else {
+      return (
+        <GameContext.Provider value={{ game, makeMove: this.makeMove }}>
+          <GameContainer>
+            <GlobalBoard localBoards={game.local_boards} />
+            <Spacer />
+            {game.turn === playerPiece ? 'Your turn' : 'CPU is thinking...'}
+            <Spacer />
+            {game.winner ? `${game.winner} won the game` : 'Game ongoing'}
+          </GameContainer>
+        </GameContext.Provider>
+      );
+    }
   }
 }
