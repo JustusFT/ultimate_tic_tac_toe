@@ -5,6 +5,7 @@ import LocalBoard from './LocalBoard';
 const Grid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
   width: 600px;
   height: 600px;
 `;

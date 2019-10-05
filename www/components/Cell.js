@@ -8,7 +8,7 @@ const CellContainer = styled.div`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  ${props => generateBorders(props.index, '1px solid #aaa')}
+  ${props => generateBorders(props.index, '1px solid #999')}
 `;
 
 export default function Cell({ piece, boardIndex, cellIndex, active }) {
