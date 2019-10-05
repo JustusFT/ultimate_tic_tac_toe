@@ -18,7 +18,8 @@ export default class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      game: null
+      game: null,
+      playerPiece: 'X'
     };
   }
 
@@ -49,6 +50,13 @@ export default class Game extends React.Component {
     this.gameWorker.onmessage = event => {
       const { data } = event;
       switch (data.type) {
+        case 'WORKER_READY': {
+          if (this.state.playerPiece === 'O') {
+            this.gameWorker.postMessage({
+              type: 'CPU_MOVE'
+            });
+          }
+        }
         case 'UPDATE_STATE': {
           this.setState({
             game: data.payload
@@ -59,13 +67,14 @@ export default class Game extends React.Component {
   }
 
   render() {
-    const { game } = this.state;
+    const { game, playerPiece } = this.state;
+
     return game ? (
       <GameContext.Provider value={{ game, makeMove: this.makeMove }}>
         <GameContainer>
           <GlobalBoard localBoards={game.local_boards} />
           <Spacer />
-          {game.turn === 'X' ? 'Your turn' : 'CPU is thinking...'}
+          {game.turn === playerPiece ? 'Your turn' : 'CPU is thinking...'}
           <Spacer />
           {game.winner ? `${game.winner} won the game` : 'Game ongoing'}
         </GameContainer>

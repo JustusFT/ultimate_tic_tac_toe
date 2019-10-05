@@ -205,7 +205,8 @@ impl Game {
    }
 
    pub fn cpu_move(&mut self, depth: i16) {
-      let (best_move_a, best_move, _) = self.negamax(depth, -3000, 3000, -1);
+      let color = if self.turn == Piece::X { 1 } else { -1 };
+      let (best_move_a, best_move, _) = self.negamax(depth, -3000, 3000, color);
       self.make_move(best_move_a.unwrap(), best_move.unwrap());
    }
 

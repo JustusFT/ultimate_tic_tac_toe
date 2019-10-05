@@ -30,7 +30,7 @@ const Grid = styled.div`
   grid-template-rows: repeat(3, 1fr);
   margin: 8px;
   box-sizing: border-box;
-  border: 2px dashed ${props => (props.active ? '#333' : 'transparent')};
+  border: 3px dashed ${props => (props.active ? '#333' : 'transparent')};
   padding: 6px;
 `;
 

@@ -12,9 +12,6 @@ function updateState(game) {
 import('../../pkg').then(({ Game }) => {
   const game = Game.new();
 
-  // send initial state
-  updateState(game);
-
   onmessage = function(event) {
     const { data } = event;
     switch (data.type) {
@@ -31,4 +28,10 @@ import('../../pkg').then(({ Game }) => {
       }
     }
   };
+
+  // since the worker initializes asynchronously, we post this to notify when its ready
+  postMessage({ type: 'WORKER_READY' });
+
+  // send initial state
+  updateState(game);
 });
