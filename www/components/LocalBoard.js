@@ -41,7 +41,8 @@ const Layer = styled.div`
 export default function LocalBoard({ data, boardIndex }) {
   const { game } = useContext(GameContext);
   const active =
-    game.current_board === null || game.current_board === boardIndex;
+    !game.winner &&
+    (game.current_board === null || game.current_board === boardIndex);
 
   const legal = !data.claimer && active;
 

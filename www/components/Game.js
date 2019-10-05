@@ -23,11 +23,18 @@ export default class Game extends React.Component {
   }
 
   makeMove = (localBoard, cellBoard) => {
+    if (this.state.winner) {
+      return;
+    }
     this.gameWorker.postMessage({
       type: 'PLAYER_MOVE',
       payload: [localBoard, cellBoard]
     });
 
+    // also do cpu move
+    if (this.state.winner) {
+      return;
+    }
     this.gameWorker.postMessage({
       type: 'CPU_MOVE'
     });
