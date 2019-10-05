@@ -19,7 +19,8 @@ export default class Game extends React.Component {
     super(props);
     this.state = {
       game: null,
-      playerPiece: null
+      playerPiece: null,
+      type: null
     };
   }
 
@@ -33,7 +34,9 @@ export default class Game extends React.Component {
     });
 
     // also do cpu move
-    this.cpuMove();
+    if (this.state.type === 'VS_CPU') {
+      this.cpuMove();
+    }
   };
 
   cpuMove = () => {
@@ -64,11 +67,29 @@ export default class Game extends React.Component {
   }
 
   render() {
-    const { game, playerPiece } = this.state;
+    const { game, playerPiece, type } = this.state;
 
     if (!game) {
       return <div>Loading...</div>;
-    } else if (!playerPiece) {
+    } else if (!type) {
+      return (
+        <div>
+          <button onClick={() => this.setState({ type: 'VS_CPU' })}>
+            Play against the CPU
+          </button>
+          <button
+            onClick={() => {
+              this.setState({
+                type: 'LOCAL_2_PLAYER'
+                // playerPiece: 'X'
+              });
+            }}
+          >
+            Play local 2 players
+          </button>
+        </div>
+      );
+    } else if (type === 'VS_CPU' && !playerPiece) {
       return (
         <div>
           <button onClick={() => this.setState({ playerPiece: 'X' })}>
@@ -90,9 +111,18 @@ export default class Game extends React.Component {
           <GameContainer>
             <GlobalBoard localBoards={game.local_boards} />
             <Spacer />
-            {game.turn === playerPiece ? 'Your turn' : 'CPU is thinking...'}
-            <Spacer />
-            {game.winner ? `${game.winner} won the game` : 'Game ongoing'}
+            {game.winner ? (
+              `${game.winner} won the game`
+            ) : (
+              <div>
+                {type === 'VS_CPU' &&
+                  (game.turn === playerPiece
+                    ? 'Your turn'
+                    : 'CPU is thinking...')}
+                {type === 'LOCAL_2_PLAYER' && <div>{game.turn} to play</div>}
+                <Spacer />
+              </div>
+            )}
           </GameContainer>
         </GameContext.Provider>
       );
