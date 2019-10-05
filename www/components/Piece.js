@@ -11,8 +11,16 @@ const pieceMap = {
 
 const Img = styled.img`
   width: 70%;
+  user-select: none;
 `;
 
 export default function Piece({ piece }) {
-  return <Img src={pieceMap[piece]} />;
+  return (
+    <Img
+      onDragStart={e => {
+        e.preventDefault();
+      }}
+      src={pieceMap[piece]}
+    />
+  );
 }
