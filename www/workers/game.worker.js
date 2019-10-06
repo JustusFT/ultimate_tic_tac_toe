@@ -1,16 +1,16 @@
 // The game will run on a separate thread to keep the UI running smoothly.
 
-// Sends the current game state to the main thread.
-// Call this function whenever you want to give the latest game data to React
-function updateState(game) {
-  postMessage({
-    type: 'UPDATE_STATE',
-    payload: game.get_state()
-  });
-}
+import('../../pkg').then(pkg => {
+  // Sends the current game state to the main thread.
+  // Call this function whenever you want to give the latest game data to React
+  function updateState(game) {
+    postMessage({
+      type: 'UPDATE_STATE',
+      payload: pkg.get_game_state(game)
+    });
+  }
 
-import('../../pkg').then(({ Game }) => {
-  let game = Game.new();
+  let game = pkg.new_game();
 
   onmessage = function(event) {
     const { data } = event;
@@ -18,7 +18,7 @@ import('../../pkg').then(({ Game }) => {
       case 'RESET_GAME': {
         // throw out the old game and create a new instance
         game.free();
-        game = Game.new();
+        game = pkg.new_game();
         updateState(game);
         break;
       }
@@ -29,15 +29,12 @@ import('../../pkg').then(({ Game }) => {
         break;
       }
       case 'CPU_MOVE': {
-        game.cpu_move(5);
+        pkg.cpu_move(game, 5);
         updateState(game);
         break;
       }
     }
   };
-
-  // since the worker initializes asynchronously, we post this to notify when its ready
-  postMessage({ type: 'WORKER_READY' });
 
   // send initial state
   updateState(game);
