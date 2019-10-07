@@ -8,19 +8,6 @@ enum Potential {
     NEITHER,
 }
 
-// remove a piece and switch turns
-// it cant reverse claimed state, winner state, or current local board, do that manually
-fn remove_move(game: &mut base_game::Game, local_board: usize, cell: usize) {
-    // validate the move is legal before proceeding
-    assert!(local_board < 9);
-    assert!(cell < 9);
-
-    // update the target cell
-    game.local_boards[local_board].board[cell] = base_game::Piece::BLANK;
-
-    game.switch_turns();
-}
-
 fn local_row_potential(
     game: &base_game::Game,
     local_board_index: usize,
@@ -173,7 +160,7 @@ pub fn negamax(
     mut alpha: i16,
     beta: i16,
     color: i16,
-) -> (Option<usize>, Option<usize>, i16) {
+) -> (Option<u8>, Option<u8>, i16) {
     if depth == 0 || game.winner != None {
         let score = (color * evaluate(game)) - depth;
         return (None, None, score);
@@ -182,17 +169,14 @@ pub fn negamax(
     let mut best_move = None;
     let mut best_score = -2000;
 
-    let original_board = game.current_board;
-    let original_winner = game.winner;
-
     // loop through legal moves
     match game.current_board {
         Some(current_board) => {
             best_move_a = Some(current_board);
-            let original_claimer = game.local_boards[current_board].claimer;
             for i in 0..9 {
-                let x = game.local_boards[current_board].board[i];
-                if x == base_game::Piece::BLANK {
+                if game.local_boards[usize::from(current_board)].board[usize::from(i)]
+                    == base_game::Piece::BLANK
+                {
                     // legal move!
                     game.make_move(current_board, i);
                     let (_, _, next_score) = negamax(game, depth - 1, -beta, -alpha, -color);
@@ -200,10 +184,7 @@ pub fn negamax(
                         best_score = -next_score;
                         best_move = Some(i);
                     }
-                    remove_move(game, current_board, i);
-                    game.local_boards[current_board].claimer = original_claimer;
-                    game.current_board = original_board;
-                    game.winner = original_winner;
+                    game.undo_move();
                     alpha = cmp::max(alpha, -next_score);
                     if alpha >= beta {
                         break;
@@ -214,14 +195,14 @@ pub fn negamax(
         // if can go anywhere then loop through each unclaimed board
         None => {
             for current_board in 0..9 {
-                if game.local_boards[current_board].claimer != None {
+                if game.local_boards[usize::from(current_board)].claimer != None {
                     continue;
                 }
                 // TODO: DRY it up with above
-                let original_claimer = game.local_boards[current_board].claimer;
                 for i in 0..9 {
-                    let x = game.local_boards[current_board].board[i];
-                    if x == base_game::Piece::BLANK {
+                    if game.local_boards[usize::from(current_board)].board[usize::from(i)]
+                        == base_game::Piece::BLANK
+                    {
                         // legal move!
                         game.make_move(current_board, i);
                         let (_, _, next_score) = negamax(game, depth - 1, -beta, -alpha, -color);
@@ -230,10 +211,7 @@ pub fn negamax(
                             best_score = -next_score;
                             best_move = Some(i);
                         }
-                        remove_move(game, current_board, i);
-                        game.local_boards[current_board].claimer = original_claimer;
-                        game.current_board = original_board;
-                        game.winner = original_winner;
+                        game.undo_move();
                         alpha = cmp::max(alpha, -next_score);
                         if alpha >= beta {
                             break;

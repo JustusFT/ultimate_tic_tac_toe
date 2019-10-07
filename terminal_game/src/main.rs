@@ -46,11 +46,11 @@ const BIG_O: BigPieceStringArray = [
 ];
 
 // these mark the coordinates where the top-left cell of a local board is located from the BOARD_DISPLAY
-const X_CORNERS: [usize; 3] = [2, 16, 30];
-const Y_CORNERS: [usize; 3] = [1, 7, 13];
+const X_CORNERS: [u16; 3] = [2, 16, 30];
+const Y_CORNERS: [u16; 3] = [1, 7, 13];
 // these mark the distance to the other cells of the local board, starting from the top left cell of the local board
-const X_OFFSETS: [usize; 3] = [0, 4, 8];
-const Y_OFFSETS: [usize; 3] = [0, 2, 4];
+const X_OFFSETS: [u16; 3] = [0, 4, 8];
+const Y_OFFSETS: [u16; 3] = [0, 2, 4];
 
 // converts board number into 2D coords (x, y)
 // 0 is (0, 0), 8 is (2, 2)
@@ -107,15 +107,15 @@ fn draw_big_piece(
 ) {
     let (corner_x, corner_y) = board_coordinates(local_board);
 
-    for i in 0usize..5 {
+    for i in 0..5 {
         write!(
             stdout,
             "{move}{line_text}",
             move = cursor::Goto(
-                u16::try_from(X_CORNERS[corner_x] - 1).ok().unwrap(),
-                u16::try_from(Y_CORNERS[corner_y] + i).ok().unwrap()
+                X_CORNERS[corner_x] - 1,
+                Y_CORNERS[corner_y] + i
             ),
-            line_text = overlay[i]
+            line_text = overlay[usize::from(i)]
         )
         .unwrap();
     }
@@ -155,7 +155,7 @@ fn draw_board(game: &base_game::Game, stdout: &mut termion::raw::RawTerminal<std
 // request input for next move
 fn request_user_move(game: &mut base_game::Game) {
     let mut rl = Editor::<()>::new();
-    let mut current_board_index: usize;
+    let mut current_board_index: u8;
 
     match game.current_board {
         Some(x) => {
@@ -167,8 +167,8 @@ fn request_user_move(game: &mut base_game::Game) {
             let readline = rl.readline("> ");
             match readline {
                 Ok(line) => {
-                    current_board_index = line.parse::<usize>().unwrap();
-                    if game.local_boards[current_board_index].claimer == None {
+                    current_board_index = line.parse::<u8>().unwrap();
+                    if game.local_boards[usize::from(current_board_index)].claimer == None {
                         break;
                     }
                 }
@@ -182,8 +182,8 @@ fn request_user_move(game: &mut base_game::Game) {
         let readline = rl.readline("> ");
         match readline {
             Ok(line) => {
-                let n = line.parse::<usize>().unwrap();
-                if game.local_boards[current_board_index].board[n] == base_game::Piece::BLANK {
+                let n = line.parse::<u8>().unwrap();
+                if game.local_boards[usize::from(current_board_index)].board[usize::from(n)] == base_game::Piece::BLANK {
                     game.make_move(current_board_index, n);
                     break;
                 }
