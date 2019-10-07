@@ -42,12 +42,16 @@ const ClaimerOverlay = styled.div`
 `;
 
 export default function LocalBoard({ data, boardIndex }) {
-  const { game } = useContext(GameContext);
+  const { game, type, playerPiece } = useContext(GameContext);
   const active =
     !game.winner &&
     (game.current_board === null || game.current_board === boardIndex);
 
   const legal = !data.claimer && active;
+  // the player can't play a move if the cpu is doing their move
+  const isPlayerMove =
+    (type === 'VS_CPU' && playerPiece === game.turn) ||
+    type === 'LOCAL_2_PLAYER';
 
   return (
     <Container index={boardIndex}>
@@ -59,7 +63,7 @@ export default function LocalBoard({ data, boardIndex }) {
                 boardIndex={boardIndex}
                 cellIndex={cellIndex}
                 piece={cell}
-                active={legal}
+                active={legal && isPlayerMove}
               />
             ))}
           </Grid>

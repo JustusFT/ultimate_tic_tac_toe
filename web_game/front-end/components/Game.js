@@ -136,7 +136,9 @@ export default class Game extends React.Component {
       );
     } else {
       return (
-        <GameContext.Provider value={{ game, makeMove: this.makeMove }}>
+        <GameContext.Provider
+          value={{ game, type, playerPiece, makeMove: this.makeMove }}
+        >
           <GameContainer>
             <Button
               onClick={() => {

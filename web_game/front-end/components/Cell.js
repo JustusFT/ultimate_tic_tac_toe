@@ -12,14 +12,17 @@ const CellContainer = styled.div`
 `;
 
 export default function Cell({ piece, boardIndex, cellIndex, active }) {
-  const { makeMove } = useContext(GameContext);
+  const { game, makeMove } = useContext(GameContext);
 
   return (
     <CellContainer
       index={cellIndex}
       onClick={() => {
         // don't allow moves if the board is not active
-        if (active) {
+        if (
+          game.local_boards[boardIndex].board[cellIndex] === 'BLANK' &&
+          active
+        ) {
           makeMove(boardIndex, cellIndex);
         }
       }}
