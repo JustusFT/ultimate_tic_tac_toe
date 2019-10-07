@@ -16,7 +16,7 @@ module.exports = {
       template: 'index.html'
     }),
     new WasmPackPlugin({
-      crateDirectory: path.resolve(__dirname, '..')
+      crateDirectory: path.resolve(__dirname, '../wasm')
     }),
     new WorkerPlugin({
       globalObject: 'self'

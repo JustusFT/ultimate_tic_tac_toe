@@ -1,6 +1,6 @@
 // The game will run on a separate thread to keep the UI running smoothly.
 
-import('../../pkg').then(pkg => {
+import('../../wasm/pkg').then(pkg => {
   // Sends the current game state to the main thread.
   // Call this function whenever you want to give the latest game data to React
   function updateState(game) {

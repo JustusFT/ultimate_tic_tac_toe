@@ -1,0 +1,15 @@
+[package]
+name = "base_game"
+version = "0.1.0"
+authors = ["Justus Tumacder <JustusFT@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = "^1.0.59"
+serde_derive = "^1.0.59"
+
+[dependencies.wasm-bindgen]
+version = "^0.2"
+features = ["serde-serialize"]
