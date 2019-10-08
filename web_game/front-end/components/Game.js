@@ -150,7 +150,11 @@ export default class Game extends React.Component {
             <GlobalBoard localBoards={game.local_boards} />
             <Spacer />
             {game.winner ? (
-              `${game.winner} won the game`
+              game.winner === 'BLANK' ? (
+                `Draw!`
+              ) : (
+                `${game.winner} won the game`
+              )
             ) : (
               <div>
                 {type === 'VS_CPU' &&
