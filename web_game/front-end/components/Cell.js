@@ -4,19 +4,34 @@ import generateBorders from '../utils/generateBorders';
 import Piece from './Piece';
 
 const CellContainer = styled.div`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  padding: 3px;
   ${props => generateBorders(props.index, '1px solid #999')}
 `;
 
-export default function Cell({ boardIndex, cellIndex, piece, onClick }) {
+const Highlight = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  box-sizing: border-box;
+  border: 3px dashed ${props => (props.highlighted ? '#333' : 'transparent')};
+`;
+
+export default function Cell({
+  boardIndex,
+  cellIndex,
+  piece,
+  onClick,
+  highlighted
+}) {
   return (
     <CellContainer
       index={cellIndex}
       onClick={() => onClick(boardIndex, cellIndex)}
     >
-      <Piece piece={piece} />
+      <Highlight highlighted={highlighted}>
+        <Piece piece={piece} />
+      </Highlight>
     </CellContainer>
   );
 }

@@ -23,6 +23,7 @@ export default function GlobalBoard({ game, onMove }) {
             active={active}
             boardIndex={boardIndex}
             onMove={onMove}
+            lastMove={game.history[game.history.length - 1]}
           />
         );
       })}

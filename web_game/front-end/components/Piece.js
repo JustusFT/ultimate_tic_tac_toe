@@ -9,7 +9,7 @@ const pieceMap = {
 };
 
 const Img = styled.img`
-  width: 70%;
+  width: 90%;
   user-select: none;
 `;
 

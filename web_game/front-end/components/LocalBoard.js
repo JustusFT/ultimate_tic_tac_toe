@@ -40,7 +40,13 @@ const ClaimerOverlay = styled.div`
   justify-content: center;
 `;
 
-export default function LocalBoard({ data, active, boardIndex, onMove }) {
+export default function LocalBoard({
+  data,
+  active,
+  boardIndex,
+  onMove,
+  lastMove
+}) {
   return (
     <Container index={boardIndex}>
       <LayerContainer>
@@ -53,6 +59,11 @@ export default function LocalBoard({ data, active, boardIndex, onMove }) {
                 cellIndex={cellIndex}
                 piece={cell}
                 onClick={onMove}
+                highlighted={
+                  lastMove &&
+                  lastMove.board_index === boardIndex &&
+                  lastMove.piece_index === cellIndex
+                }
               />
             ))}
           </Grid>
