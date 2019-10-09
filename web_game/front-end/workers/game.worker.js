@@ -36,6 +36,10 @@ import('../../wasm/pkg').then(pkg => {
     }
   };
 
+  postMessage({
+    type: 'INITIALIZE'
+  });
+
   // send initial state
   updateState(game);
 });

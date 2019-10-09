@@ -1,8 +1,7 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import generateBorders from '../utils/generateBorders';
 import Cell from './Cell';
-import { GameContext } from './Game';
 import Piece from './Piece';
 
 const Container = styled.div`
@@ -41,29 +40,19 @@ const ClaimerOverlay = styled.div`
   justify-content: center;
 `;
 
-export default function LocalBoard({ data, boardIndex }) {
-  const { game, type, playerPiece } = useContext(GameContext);
-  const active =
-    !game.winner &&
-    (game.current_board === null || game.current_board === boardIndex);
-
-  const legal = !data.claimer && active;
-  // the player can't play a move if the cpu is doing their move
-  const isPlayerMove =
-    (type === 'VS_CPU' && playerPiece === game.turn) ||
-    type === 'LOCAL_2_PLAYER';
-
+export default function LocalBoard({ data, active, boardIndex, onMove }) {
   return (
     <Container index={boardIndex}>
       <LayerContainer>
         <Layer>
-          <Grid active={legal}>
+          <Grid active={active}>
             {data.board.map((cell, cellIndex) => (
               <Cell
+                key={cellIndex}
                 boardIndex={boardIndex}
                 cellIndex={cellIndex}
                 piece={cell}
-                active={legal && isPlayerMove}
+                onClick={onMove}
               />
             ))}
           </Grid>

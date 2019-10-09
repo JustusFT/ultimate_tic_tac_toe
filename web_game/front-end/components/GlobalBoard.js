@@ -10,12 +10,22 @@ const Grid = styled.div`
   height: 600px;
 `;
 
-export default function GlobalBoard({ localBoards }) {
+export default function GlobalBoard({ game, onMove }) {
   return (
     <Grid>
-      {localBoards.map((board, boardIndex) => (
-        <LocalBoard boardIndex={boardIndex} data={board} />
-      ))}
+      {game.local_boards.map((board, boardIndex) => {
+        const active =
+          game.current_board === null || game.current_board === boardIndex;
+        return (
+          <LocalBoard
+            key={boardIndex}
+            data={board}
+            active={active}
+            boardIndex={boardIndex}
+            onMove={onMove}
+          />
+        );
+      })}
     </Grid>
   );
 }

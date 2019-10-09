@@ -4,7 +4,6 @@ import oImg from '../assets/o.svg';
 import xImg from '../assets/x.svg';
 
 const pieceMap = {
-  BLANK: '',
   X: xImg,
   O: oImg
 };
@@ -20,7 +19,7 @@ export default function Piece({ piece }) {
       onDragStart={e => {
         e.preventDefault();
       }}
-      src={pieceMap[piece]}
+      src={pieceMap[piece] || ''}
     />
   );
 }
