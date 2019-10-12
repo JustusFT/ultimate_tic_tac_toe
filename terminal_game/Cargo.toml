@@ -10,4 +10,3 @@ edition = "2018"
 termion = "1.5.3"
 rustyline = "5.0.0"
 base_game = { path = "../base_game" }
-game_ai = { path = "../game_ai" }

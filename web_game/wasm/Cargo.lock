@@ -20,13 +20,6 @@ version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "game_ai"
-version = "0.1.0"
-dependencies = [
- "base_game 0.1.0",
-]
-
-[[package]]
 name = "itoa"
 version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -105,7 +98,6 @@ name = "ultimate_tic_tac_toe"
 version = "0.1.0"
 dependencies = [
  "base_game 0.1.0",
- "game_ai 0.1.0",
  "wasm-bindgen 0.2.51 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

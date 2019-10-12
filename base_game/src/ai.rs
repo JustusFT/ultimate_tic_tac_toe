@@ -1,4 +1,5 @@
-use base_game;
+use crate::game::Game;
+use crate::{Piece, WIN_STATES};
 use std::cmp;
 
 enum Potential {
@@ -8,18 +9,14 @@ enum Potential {
     NEITHER,
 }
 
-fn local_row_potential(
-    game: &base_game::Game,
-    local_board_index: usize,
-    win_state: &[usize; 3],
-) -> Potential {
+fn local_row_potential(game: &Game, local_board_index: usize, win_state: &[usize; 3]) -> Potential {
     let has_x = win_state
         .iter()
-        .any(|x| game.local_boards[local_board_index].board[*x] == base_game::Piece::X);
+        .any(|x| game.local_boards[local_board_index].board[*x] == Piece::X);
 
     let has_o = win_state
         .iter()
-        .any(|x| game.local_boards[local_board_index].board[*x] == base_game::Piece::O);
+        .any(|x| game.local_boards[local_board_index].board[*x] == Piece::O);
 
     if has_x && has_o {
         return Potential::BOTH;
@@ -32,11 +29,7 @@ fn local_row_potential(
     }
 }
 
-fn evaluate_local_row(
-    game: &base_game::Game,
-    local_board_index: usize,
-    win_state: &[usize; 3],
-) -> i16 {
+fn evaluate_local_row(game: &Game, local_board_index: usize, win_state: &[usize; 3]) -> i16 {
     // should be a bit different than global row, rows that sending anywhere upon solve are less valuable
     let local_board = game.local_boards[local_board_index];
     let potential = local_row_potential(game, local_board_index, win_state);
@@ -53,7 +46,7 @@ fn evaluate_local_row(
         Potential::X => {
             let mut score = 0;
             win_state.iter().for_each(|x| {
-                if local_board.board[*x] == base_game::Piece::X {
+                if local_board.board[*x] == Piece::X {
                     score += 1;
                 }
             });
@@ -62,7 +55,7 @@ fn evaluate_local_row(
         Potential::O => {
             let mut score = 0;
             win_state.iter().for_each(|x| {
-                if local_board.board[*x] == base_game::Piece::O {
+                if local_board.board[*x] == Piece::O {
                     score -= 1;
                 }
             });
@@ -71,18 +64,18 @@ fn evaluate_local_row(
     }
 }
 
-fn evaluate_local_board(game: &base_game::Game, local_board_index: usize) -> i16 {
+fn evaluate_local_board(game: &Game, local_board_index: usize) -> i16 {
     let local_board = game.local_boards[local_board_index];
     match local_board.claimer {
-        Some(base_game::Piece::X) => {
+        Some(Piece::X) => {
             return 20;
         }
-        Some(base_game::Piece::O) => {
+        Some(Piece::O) => {
             return -20;
         }
         _ => {
             let mut score = 0;
-            base_game::WIN_STATES.iter().for_each(|win_state| {
+            WIN_STATES.iter().for_each(|win_state| {
                 score += evaluate_local_row(game, local_board_index, win_state);
             });
             return score;
@@ -92,14 +85,14 @@ fn evaluate_local_board(game: &base_game::Game, local_board_index: usize) -> i16
 
 // returns whether X, O, both, or neither can claim this row
 // maybe add a new enum for this function, don't use Option<Piece>
-fn row_potential(game: &base_game::Game, win_state: &[usize; 3]) -> Potential {
+fn row_potential(game: &Game, win_state: &[usize; 3]) -> Potential {
     let has_x = win_state
         .iter()
-        .any(|x| game.local_boards[*x].claimer == Some(base_game::Piece::X));
+        .any(|x| game.local_boards[*x].claimer == Some(Piece::X));
 
     let has_o = win_state
         .iter()
-        .any(|x| game.local_boards[*x].claimer == Some(base_game::Piece::O));
+        .any(|x| game.local_boards[*x].claimer == Some(Piece::O));
 
     if has_x && has_o {
         return Potential::NEITHER;
@@ -113,7 +106,7 @@ fn row_potential(game: &base_game::Game, win_state: &[usize; 3]) -> Potential {
 }
 
 // gets the heuristic value of the row10
-fn evaluate_row(game: &base_game::Game, win_state: &[usize; 3]) -> i16 {
+fn evaluate_row(game: &Game, win_state: &[usize; 3]) -> i16 {
     let potential = row_potential(game, win_state);
     match potential {
         Potential::NEITHER => {
@@ -131,15 +124,15 @@ fn evaluate_row(game: &base_game::Game, win_state: &[usize; 3]) -> i16 {
 }
 
 // gets the heuristic value of the board
-fn evaluate(game: &base_game::Game) -> i16 {
+fn evaluate(game: &Game) -> i16 {
     match game.winner {
-        Some(base_game::Piece::X) => {
+        Some(Piece::X) => {
             return 1000;
         }
-        Some(base_game::Piece::O) => {
+        Some(Piece::O) => {
             return -1000;
         }
-        Some(base_game::Piece::BLANK) => {
+        Some(Piece::BLANK) => {
             return 0;
         }
         _ => {}
@@ -147,7 +140,7 @@ fn evaluate(game: &base_game::Game) -> i16 {
 
     let mut score: i16 = 0;
 
-    base_game::WIN_STATES.iter().for_each(|win_triple| {
+    WIN_STATES.iter().for_each(|win_triple| {
         score += evaluate_row(game, win_triple);
     });
 
@@ -155,7 +148,7 @@ fn evaluate(game: &base_game::Game) -> i16 {
 }
 
 pub fn negamax(
-    game: &mut base_game::Game,
+    game: &mut Game,
     depth: i16,
     mut alpha: i16,
     beta: i16,
@@ -175,7 +168,7 @@ pub fn negamax(
             best_move_a = Some(current_board);
             for i in 0..9 {
                 if game.local_boards[usize::from(current_board)].board[usize::from(i)]
-                    == base_game::Piece::BLANK
+                    == Piece::BLANK
                 {
                     // legal move!
                     game.make_move(current_board, i);
@@ -201,7 +194,7 @@ pub fn negamax(
                 // TODO: DRY it up with above
                 for i in 0..9 {
                     if game.local_boards[usize::from(current_board)].board[usize::from(i)]
-                        == base_game::Piece::BLANK
+                        == Piece::BLANK
                     {
                         // legal move!
                         game.make_move(current_board, i);

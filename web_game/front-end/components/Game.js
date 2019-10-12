@@ -24,7 +24,9 @@ export default class Game extends React.Component {
           break;
         }
         case 'INITIALIZE': {
-          this.props.onBegin({ gameWorker: this.gameWorker });
+          if (this.props.onBegin) {
+            this.props.onBegin({ gameWorker: this.gameWorker });
+          }
           break;
         }
       }

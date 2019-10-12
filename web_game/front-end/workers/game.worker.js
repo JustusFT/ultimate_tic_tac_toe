@@ -4,13 +4,22 @@ import('../../wasm/pkg').then(pkg => {
   // Sends the current game state to the main thread.
   // Call this function whenever you want to give the latest game data to React
   function updateState(game) {
+    console.log(pkg.get_game_state(game));
     postMessage({
       type: 'UPDATE_STATE',
       payload: pkg.get_game_state(game)
     });
   }
 
-  let game = pkg.new_game();
+  let game;
+
+  try {
+    game = pkg.new_from_fen(
+      '........./........./....x..../.....o.../....xo.../...x..x../..o....../........./......... x........ o 4'
+    );
+  } catch (e) {
+    console.error(e);
+  }
 
   onmessage = function(event) {
     const { data } = event;
@@ -18,7 +27,14 @@ import('../../wasm/pkg').then(pkg => {
       case 'RESET_GAME': {
         // throw out the old game and create a new instance
         game.free();
-        game = pkg.new_game();
+        try {
+          game = pkg.new_from_fen(
+            '........./........./....x..../.....o.../....xo.../...x..x../..o....../........./......... x........ o 4'
+          );
+          console.log('asdf2', game.local_boards);
+        } catch (e) {
+          console.error(e);
+        }
         updateState(game);
         break;
       }

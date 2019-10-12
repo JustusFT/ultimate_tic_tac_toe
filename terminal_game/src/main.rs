@@ -1,5 +1,4 @@
 use base_game;
-use game_ai;
 use rustyline::Editor;
 use std::convert::TryFrom;
 use std::io::{stdout, Write};
@@ -122,7 +121,10 @@ fn draw_big_piece(
 }
 
 // re-draw the whole board
-fn draw_board(game: &base_game::Game, stdout: &mut termion::raw::RawTerminal<std::io::Stdout>) {
+fn draw_board(
+    game: &base_game::game::Game,
+    stdout: &mut termion::raw::RawTerminal<std::io::Stdout>,
+) {
     write!(
       stdout,
       "{clear}{move}{board}",
@@ -153,7 +155,7 @@ fn draw_board(game: &base_game::Game, stdout: &mut termion::raw::RawTerminal<std
 }
 
 // request input for next move
-fn request_user_move(game: &mut base_game::Game) {
+fn request_user_move(game: &mut base_game::game::Game) {
     let mut rl = Editor::<()>::new();
     let mut current_board_index: u8;
 
@@ -183,7 +185,9 @@ fn request_user_move(game: &mut base_game::Game) {
         match readline {
             Ok(line) => {
                 let n = line.parse::<u8>().unwrap();
-                if game.local_boards[usize::from(current_board_index)].board[usize::from(n)] == base_game::Piece::BLANK {
+                if game.local_boards[usize::from(current_board_index)].board[usize::from(n)]
+                    == base_game::Piece::BLANK
+                {
                     game.make_move(current_board_index, n);
                     break;
                 }
@@ -197,7 +201,8 @@ fn main() {
     // Enter raw mode.
     let mut stdout = stdout().into_raw_mode().unwrap();
 
-    let mut game = base_game::Game::new();
+    // let mut game = base_game::Game::new();
+    let mut game = base_game::fen::new_from_fen("........./........./....x..../.....o.../....xo.../...x..x../..o....../........./......... x........ x -").unwrap();
 
     loop {
         draw_board(&game, &mut stdout);
@@ -205,7 +210,7 @@ fn main() {
         request_user_move(&mut game);
         draw_board(&game, &mut stdout);
         println!("\rCPU is thinking...");
-        let (best_move_a, best_move, _) = game_ai::negamax(&mut game, 5, -3000, 3000, -1);
+        let (best_move_a, best_move, _) = base_game::ai::negamax(&mut game, 5, -3000, 3000, -1);
         game.make_move(best_move_a.unwrap(), best_move.unwrap());
     }
 }
