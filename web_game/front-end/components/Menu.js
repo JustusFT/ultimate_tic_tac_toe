@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import Tutorial from './Tutorial';
 
 const Button = styled.span`
   display: inline-block;
@@ -52,7 +53,7 @@ export default function Menu({ onResult }) {
         </Button>
       </div>
     ),
-    howToPlay: <div>TODO</div>,
+    howToPlay: <Tutorial />,
     credits: <div>TODO</div>
   };
 

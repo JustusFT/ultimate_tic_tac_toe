@@ -1,50 +1,44 @@
 import React from 'react';
+import useGame from '../hooks/useGame';
+import GlobalBoard from './GlobalBoard';
 
-export default class Game extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      game: null
-    };
-  }
-
-  componentDidMount() {
-    this.gameWorker = new Worker('../workers/game.worker.js', {
-      name: 'game',
-      type: 'module'
-    });
-
-    this.gameWorker.onmessage = event => {
-      const { data } = event;
-      switch (data.type) {
-        case 'UPDATE_STATE': {
-          this.setState({
-            game: data.payload
-          });
-          break;
-        }
-        case 'INITIALIZE': {
-          if (this.props.onBegin) {
-            this.props.onBegin({ gameWorker: this.gameWorker });
-          }
-          break;
-        }
+export default function Game({ gameMode }) {
+  const { game, gameWorker } = useGame({
+    onInitialize: () => {
+      if (gameMode.type === 'vsCpu' && gameMode.playerPiece === 'O') {
+        gameWorker.current.postMessage({
+          type: 'CPU_MOVE'
+        });
       }
-    };
+    }
+  });
 
-    this.gameWorker.postMessage({
-      type: 'RESET_GAME'
-    });
-  }
-
-  componentWillUnmount() {
-    this.gameWorker.terminate();
-  }
-
-  render() {
-    const { game } = this.state;
-    const { render } = this.props;
-
-    return game && render({ game, gameWorker: this.gameWorker });
-  }
+  return (
+    game && (
+      <GlobalBoard
+        game={game}
+        onMove={(boardIndex, cellIndex) => {
+          if (
+            game.winner ||
+            game.local_boards[boardIndex].claimed ||
+            game.local_boards[boardIndex].board[cellIndex] !== 'BLANK' ||
+            (game.current_board !== null &&
+              game.current_board !== boardIndex) ||
+            (gameMode.type === 'vsCpu' && game.turn !== gameMode.playerPiece)
+          ) {
+            return;
+          }
+          gameWorker.current.postMessage({
+            type: 'PLAYER_MOVE',
+            payload: [boardIndex, cellIndex]
+          });
+          if (gameMode.type === 'vsCpu' && !game.winner) {
+            gameWorker.current.postMessage({
+              type: 'CPU_MOVE'
+            });
+          }
+        }}
+      />
+    )
+  );
 }

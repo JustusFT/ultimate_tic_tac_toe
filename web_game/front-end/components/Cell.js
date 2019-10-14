@@ -27,7 +27,11 @@ export default function Cell({
   return (
     <CellContainer
       index={cellIndex}
-      onClick={() => onClick(boardIndex, cellIndex)}
+      onClick={() => {
+        if (onClick) {
+          onClick(boardIndex, cellIndex);
+        }
+      }}
     >
       <Highlight highlighted={highlighted}>
         <Piece piece={piece} />

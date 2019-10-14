@@ -15,6 +15,11 @@ pub fn new_from_fen(fen: String) -> Result<base_game::game::Game, JsValue> {
 }
 
 #[wasm_bindgen]
+pub fn get_fen(game: &base_game::game::Game) -> String {
+    return base_game::fen::get_fen(game);
+}
+
+#[wasm_bindgen]
 pub fn get_game_state(game: &base_game::game::Game) -> JsValue {
     JsValue::from_serde(game).unwrap()
 }
