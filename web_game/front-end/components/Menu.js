@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import githubMark from '../assets/GitHub-Mark-32px.png';
 import Button from './Button';
 import HorizontalButtonSet from './HorizontalButtonSet';
 import HorizontalSpacer from './HorizontalSpacer';
@@ -29,6 +30,15 @@ const VerticalButtonSet = styled.div`
   align-items: stretch;
 `;
 
+const Footer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const FlexGrow = styled.div`
+  flex: 1;
+`;
+
 export default function Menu({ onResult }) {
   const menuTree = {
     root: (
@@ -54,9 +64,26 @@ export default function Menu({ onResult }) {
             How to play
           </Button>
           <Spacer />
-          <Button block onClick={() => pushHistory('credits')}>
-            Credits
-          </Button>
+          <Spacer />
+          <Footer>
+            <div>Made by Justus Tumacder</div>
+            <FlexGrow />
+            <a href="https://github.com/justusft">
+              <img src={githubMark} width={32} height={32} />
+            </a>
+            <div
+              style={{
+                display: 'inline-block',
+                width: '2px',
+                height: '2em',
+                backgroundColor: '#aaa',
+                margin: '0 16px'
+              }}
+            />
+            <a href="https://github.com/JustusFT/ultimate_tic_tac_toe">
+              Source Code
+            </a>
+          </Footer>
         </VerticalButtonSet>
       </div>
     ),
@@ -89,8 +116,7 @@ export default function Menu({ onResult }) {
         </HorizontalButtonSet>
       </PieceMenuContainer>
     ),
-    howToPlay: <Tutorial />,
-    credits: <div>TODO</div>
+    howToPlay: <Tutorial />
   };
 
   function pushHistory(item) {
