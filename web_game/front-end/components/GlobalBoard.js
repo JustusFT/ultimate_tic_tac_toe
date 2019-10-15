@@ -41,8 +41,10 @@ export default function GlobalBoard({ game, onMove }) {
           <Grid dimensions={dimensions}>
             {game.local_boards.map((board, boardIndex) => {
               const active =
-                game.current_board === null ||
-                game.current_board === boardIndex;
+                !game.winner &&
+                game.local_boards[boardIndex].claimer === null &&
+                (game.current_board === null ||
+                  game.current_board === boardIndex);
               return (
                 <LocalBoard
                   key={boardIndex}
