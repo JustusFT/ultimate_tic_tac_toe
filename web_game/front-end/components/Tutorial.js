@@ -1,7 +1,20 @@
 import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
 import useGame from '../hooks/useGame';
 import Button from './Button';
 import GlobalBoard from './GlobalBoard';
+import HorizontalButtonSet from './HorizontalButtonSet';
+import HorizontalSpacer from './HorizontalSpacer';
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const Texts = styled.div`
+  padding: 0 16px;
+`;
 
 const pages = [
   {
@@ -118,16 +131,19 @@ export default function Tutorial() {
 
   return (
     game && (
-      <div>
+      <Container>
         <GlobalBoard game={game} />
-        <div>{pages[pageIndex].text}</div>
-        {pageIndex > 0 && (
-          <Button onClick={() => setPageIndex(pageIndex - 1)}>Prev</Button>
-        )}
-        {pageIndex < pages.length - 1 && (
-          <Button onClick={() => setPageIndex(pageIndex + 1)}>Next</Button>
-        )}
-      </div>
+        <Texts>{pages[pageIndex].text}</Texts>
+        <HorizontalButtonSet>
+          {pageIndex > 0 && (
+            <Button onClick={() => setPageIndex(pageIndex - 1)}>Prev</Button>
+          )}
+          <HorizontalSpacer />
+          {pageIndex < pages.length - 1 && (
+            <Button onClick={() => setPageIndex(pageIndex + 1)}>Next</Button>
+          )}
+        </HorizontalButtonSet>
+      </Container>
     )
   );
 }

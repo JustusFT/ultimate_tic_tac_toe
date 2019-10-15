@@ -1,50 +1,77 @@
 import React, { useState } from 'react';
+import styled from 'styled-components';
 import Button from './Button';
+import HorizontalButtonSet from './HorizontalButtonSet';
+import HorizontalSpacer from './HorizontalSpacer';
 import Tutorial from './Tutorial';
+
+const VerticalButtonSet = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+`;
+
+const Spacer = styled.div`
+  height: 16px;
+`;
 
 export default function Menu({ onResult }) {
   const menuTree = {
     root: (
       <div>
-        <Button onClick={() => pushHistory('vsCpu')}>
-          Play against the CPU
-        </Button>
-        <Button
-          onClick={() =>
-            onResult({
-              type: 'localTwoPlayer'
-            })
-          }
-        >
-          Play 2 player game locally
-        </Button>
-        <Button onClick={() => pushHistory('howToPlay')}>How to play</Button>
-        <Button onClick={() => pushHistory('credits')}>Credits</Button>
+        <h1>Ultimate Tic Tac Toe</h1>
+        <VerticalButtonSet>
+          <Button block onClick={() => pushHistory('vsCpu')}>
+            Play against the CPU
+          </Button>
+          <Spacer />
+          <Button
+            block
+            onClick={() =>
+              onResult({
+                type: 'localTwoPlayer'
+              })
+            }
+          >
+            Play 2 player game locally
+          </Button>
+          <Spacer />
+          <Button block onClick={() => pushHistory('howToPlay')}>
+            How to play
+          </Button>
+          <Spacer />
+          <Button block onClick={() => pushHistory('credits')}>
+            Credits
+          </Button>
+        </VerticalButtonSet>
       </div>
     ),
     vsCpu: (
       <div>
         <p>Which piece will you play?</p>
-        <Button
-          onClick={() =>
-            onResult({
-              type: 'vsCpu',
-              playerPiece: 'X'
-            })
-          }
-        >
-          Play X
-        </Button>
-        <Button
-          onClick={() =>
-            onResult({
-              type: 'vsCpu',
-              playerPiece: 'O'
-            })
-          }
-        >
-          Play O
-        </Button>
+        <HorizontalButtonSet>
+          <Button
+            onClick={() =>
+              onResult({
+                type: 'vsCpu',
+                playerPiece: 'X'
+              })
+            }
+          >
+            Play X
+          </Button>
+          <HorizontalSpacer />
+          <Button
+            onClick={() =>
+              onResult({
+                type: 'vsCpu',
+                playerPiece: 'O'
+              })
+            }
+          >
+            Play O
+          </Button>
+        </HorizontalButtonSet>
       </div>
     ),
     howToPlay: <Tutorial />,
@@ -65,8 +92,9 @@ export default function Menu({ onResult }) {
   return (
     <div>
       {menuTree[currentItem]}
+      <Spacer />
       {history.length > 1 && (
-        <Button onClick={() => popHistory()}>Go back</Button>
+        <Button onClick={() => popHistory()}>Back to menu</Button>
       )}
     </div>
   );
