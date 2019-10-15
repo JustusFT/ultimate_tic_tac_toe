@@ -1,4 +1,10 @@
 import React from 'react';
+import styled from 'styled-components';
+
+const Message = styled.div`
+  text-align: center;
+  font-size: 24px;
+`;
 
 function getCpuStatusMessage({ gameMode, game }) {
   switch (game.winner) {
@@ -37,11 +43,11 @@ function getLocalTwoPlayerStatusMessage({ gameMode, game }) {
 export default function GameStatus({ gameMode, game }) {
   return (
     <div>
-      <p>
+      <Message>
         {gameMode.type === 'vsCpu' && getCpuStatusMessage({ gameMode, game })}
         {gameMode.type === 'localTwoPlayer' &&
           getLocalTwoPlayerStatusMessage({ gameMode, game })}
-      </p>
+      </Message>
     </div>
   );
 }

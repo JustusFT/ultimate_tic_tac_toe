@@ -5,6 +5,7 @@ import Button from './Button';
 import Game from './Game';
 import GameStatus from './GameStatus';
 import Menu from './Menu';
+import Spacer from './Spacer';
 
 const Container = styled.div`
   display: flex;
@@ -13,7 +14,15 @@ const Container = styled.div`
 
 const View = styled.div`
   width: 100%;
-  height: 100vh;
+
+  margin: 16px;
+  height: calc(100vh - 32px);
+
+  @media screen and (min-width: 640px) {
+    margin: 32px;
+    height: calc(100vh - 64px);
+  }
+
   min-width: 480px;
   max-width: 960px;
   min-height: 480px;
@@ -45,8 +54,10 @@ export default function App() {
                 <div>
                   <Button onClick={() => setGameMode(null)}>Leave game</Button>
                 </div>
-                <GameStatus game={game} gameMode={gameMode} />
+                <Spacer />
                 <Content>{board}</Content>
+                <Spacer />
+                <GameStatus game={game} gameMode={gameMode} />
               </GameContainer>
             )}
           />
