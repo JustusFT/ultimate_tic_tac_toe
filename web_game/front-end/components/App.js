@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import './App.css';
 import Button from './Button';
 import Game from './Game';
+import GameStatus from './GameStatus';
 import Menu from './Menu';
 
 const Container = styled.div`
@@ -39,11 +40,12 @@ export default function App() {
         {gameMode ? (
           <Game
             gameMode={gameMode}
-            render={({ board }) => (
+            render={({ game, board }) => (
               <GameContainer>
                 <div>
                   <Button onClick={() => setGameMode(null)}>Leave game</Button>
                 </div>
+                <GameStatus game={game} gameMode={gameMode} />
                 <Content>{board}</Content>
               </GameContainer>
             )}

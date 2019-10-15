@@ -15,6 +15,7 @@ export default function Game({ gameMode, render }) {
 
   return game ? (
     render({
+      game,
       board: (
         <GlobalBoard
           game={game}
