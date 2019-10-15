@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
+import Button from './Button';
 import Game from './Game';
 import Menu from './Menu';
 
@@ -8,7 +9,7 @@ export default function App() {
 
   return gameMode ? (
     <div>
-      <div onClick={() => setGameMode(null)}>Leave game</div>
+      <Button onClick={() => setGameMode(null)}>Leave game</Button>
       <Game gameMode={gameMode} />
     </div>
   ) : (

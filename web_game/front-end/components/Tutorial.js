@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import useGame from '../hooks/useGame';
+import Button from './Button';
 import GlobalBoard from './GlobalBoard';
 
 const pages = [
@@ -121,10 +122,10 @@ export default function Tutorial() {
         <GlobalBoard game={game} />
         <div>{pages[pageIndex].text}</div>
         {pageIndex > 0 && (
-          <button onClick={() => setPageIndex(pageIndex - 1)}>Prev</button>
+          <Button onClick={() => setPageIndex(pageIndex - 1)}>Prev</Button>
         )}
         {pageIndex < pages.length - 1 && (
-          <button onClick={() => setPageIndex(pageIndex + 1)}>Next</button>
+          <Button onClick={() => setPageIndex(pageIndex + 1)}>Next</Button>
         )}
       </div>
     )

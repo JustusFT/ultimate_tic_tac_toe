@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
+import Button from './Button';
 import Tutorial from './Tutorial';
-
-const Button = styled.span`
-  display: inline-block;
-  padding: 8px;
-  border: 2px solid #333;
-`;
 
 export default function Menu({ onResult }) {
   const menuTree = {
