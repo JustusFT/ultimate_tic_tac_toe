@@ -5,6 +5,7 @@ import Button from './Button';
 import GlobalBoard from './GlobalBoard';
 import HorizontalButtonSet from './HorizontalButtonSet';
 import HorizontalSpacer from './HorizontalSpacer';
+import LoadingIcon from './LoadingIcon';
 import Spacer from './Spacer';
 
 const Container = styled.div`
@@ -134,26 +135,26 @@ export default function Tutorial() {
     });
   }, [pageIndex]);
 
-  return (
-    game && (
-      <Container>
-        <div>
-          <GlobalBoard game={game} />
-        </div>
-        <TextBoxContainer>
-          <TextBox>{pages[pageIndex].text}</TextBox>
-        </TextBoxContainer>
-        <Spacer />
-        <HorizontalButtonSet>
-          {pageIndex > 0 && (
-            <Button onClick={() => setPageIndex(pageIndex - 1)}>Prev</Button>
-          )}
-          <HorizontalSpacer />
-          {pageIndex < pages.length - 1 && (
-            <Button onClick={() => setPageIndex(pageIndex + 1)}>Next</Button>
-          )}
-        </HorizontalButtonSet>
-      </Container>
-    )
+  return game ? (
+    <Container>
+      <div>
+        <GlobalBoard game={game} />
+      </div>
+      <TextBoxContainer>
+        <TextBox>{pages[pageIndex].text}</TextBox>
+      </TextBoxContainer>
+      <Spacer />
+      <HorizontalButtonSet>
+        {pageIndex > 0 && (
+          <Button onClick={() => setPageIndex(pageIndex - 1)}>Prev</Button>
+        )}
+        <HorizontalSpacer />
+        {pageIndex < pages.length - 1 && (
+          <Button onClick={() => setPageIndex(pageIndex + 1)}>Next</Button>
+        )}
+      </HorizontalButtonSet>
+    </Container>
+  ) : (
+    <LoadingIcon />
   );
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import useGame from '../hooks/useGame';
 import GlobalBoard from './GlobalBoard';
+import LoadingIcon from './LoadingIcon';
 
 export default function Game({ gameMode, render }) {
   const { game, gameWorker } = useGame({
@@ -44,6 +45,6 @@ export default function Game({ gameMode, render }) {
       )
     })
   ) : (
-    <div>Loading game...</div>
+    <LoadingIcon />
   );
 }
