@@ -3,16 +3,30 @@ import styled from 'styled-components';
 import Button from './Button';
 import HorizontalButtonSet from './HorizontalButtonSet';
 import HorizontalSpacer from './HorizontalSpacer';
+import Spacer from './Spacer';
 import Tutorial from './Tutorial';
 
-const VerticalButtonSet = styled.div`
+const PieceMenuContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const Container = styled.div`
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: stretch;
 `;
 
-const Spacer = styled.div`
-  height: 16px;
+const Content = styled.div`
+  flex: 1;
+`;
+
+const VerticalButtonSet = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 `;
 
 export default function Menu({ onResult }) {
@@ -47,8 +61,9 @@ export default function Menu({ onResult }) {
       </div>
     ),
     vsCpu: (
-      <div>
-        <p>Which piece will you play?</p>
+      <PieceMenuContainer>
+        <div>Which piece will you play?</div>
+        <Spacer />
         <HorizontalButtonSet>
           <Button
             onClick={() =>
@@ -72,7 +87,7 @@ export default function Menu({ onResult }) {
             Play O
           </Button>
         </HorizontalButtonSet>
-      </div>
+      </PieceMenuContainer>
     ),
     howToPlay: <Tutorial />,
     credits: <div>TODO</div>
@@ -90,12 +105,16 @@ export default function Menu({ onResult }) {
   const currentItem = history[history.length - 1];
 
   return (
-    <div>
-      {menuTree[currentItem]}
-      <Spacer />
-      {history.length > 1 && (
-        <Button onClick={() => popHistory()}>Back to menu</Button>
-      )}
-    </div>
+    <Container>
+      <div>
+        {history.length > 1 && (
+          <>
+            <Button onClick={() => popHistory()}>Back to menu</Button>
+            <Spacer />
+          </>
+        )}
+      </div>
+      <Content>{menuTree[currentItem]}</Content>
+    </Container>
   );
 }

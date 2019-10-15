@@ -5,31 +5,36 @@ import Button from './Button';
 import GlobalBoard from './GlobalBoard';
 import HorizontalButtonSet from './HorizontalButtonSet';
 import HorizontalSpacer from './HorizontalSpacer';
+import Spacer from './Spacer';
 
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
+  height: 100%;
+  width: 100%;
 `;
 
-const Texts = styled.div`
+const TextBoxContainer = styled.div`
+  display: flex;
+  justify-content: center;
   padding: 0 16px;
+  height: 9em;
+`;
+
+const TextBox = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
 
 const pages = [
   {
     text: (
-      <>
-        <p>
-          In Ultimate Tic Tac Toe, you play 9 games of traditional Tic Tac Toe
-          simultaneously layed out in a 3x3 grid.
-        </p>
-        <p>
-          Just like in traditional Tic Tac Toe, 2 players take turns placing
-          their pieces on the boards. The first player uses <b>X</b>, and the
-          second player uses <b>O</b>,
-        </p>
-      </>
+      <p>
+        In Ultimate Tic Tac Toe, you play 9 games of traditional Tic Tac Toe
+        simultaneously layed out in a 3x3 grid. Just like in traditional Tic Tac
+        Toe, 2 players take turns placing their pieces on the boards. The first
+        player uses <b>X</b>, and the second player uses <b>O</b>.
+      </p>
     ),
     fen:
       '........./........./........./........./........./........./........./........./......... ......... x -'
@@ -132,8 +137,13 @@ export default function Tutorial() {
   return (
     game && (
       <Container>
-        <GlobalBoard game={game} />
-        <Texts>{pages[pageIndex].text}</Texts>
+        <div>
+          <GlobalBoard game={game} />
+        </div>
+        <TextBoxContainer>
+          <TextBox>{pages[pageIndex].text}</TextBox>
+        </TextBoxContainer>
+        <Spacer />
         <HorizontalButtonSet>
           {pageIndex > 0 && (
             <Button onClick={() => setPageIndex(pageIndex - 1)}>Prev</Button>

@@ -10,27 +10,52 @@ const Container = styled.div`
   justify-content: center;
 `;
 
+const View = styled.div`
+  width: 100%;
+  height: 100vh;
+  min-width: 480px;
+  max-width: 960px;
+  min-height: 480px;
+`;
+
+const Content = styled.div`
+  flex: 1;
+  overflow: hidden;
+`;
+
+const GameContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+`;
+
 export default function App() {
   const [gameMode, setGameMode] = useState(null);
+
   return (
     <Container>
-      {gameMode ? (
-        <Game
-          gameMode={gameMode}
-          render={({ board }) => (
-            <div>
-              <Button onClick={() => setGameMode(null)}>Leave game</Button>
-              {board}
-            </div>
-          )}
-        />
-      ) : (
-        <Menu
-          onResult={result => {
-            setGameMode(result);
-          }}
-        />
-      )}
+      <View>
+        {gameMode ? (
+          <Game
+            gameMode={gameMode}
+            render={({ board }) => (
+              <GameContainer>
+                <div>
+                  <Button onClick={() => setGameMode(null)}>Leave game</Button>
+                </div>
+                <Content>{board}</Content>
+              </GameContainer>
+            )}
+          />
+        ) : (
+          <Menu
+            onResult={result => {
+              setGameMode(result);
+            }}
+          />
+        )}
+      </View>
     </Container>
   );
 }
