@@ -2,7 +2,7 @@ use crate::local_board::LocalBoard;
 use crate::{Piece, WIN_STATES};
 use wasm_bindgen::prelude::*;
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct MoveInfo {
     board_index: u8,
     piece_index: u8,
@@ -10,7 +10,7 @@ pub struct MoveInfo {
 }
 
 #[wasm_bindgen]
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct Game {
     #[wasm_bindgen(skip)]
     pub local_boards: [LocalBoard; 9],

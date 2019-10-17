@@ -7,6 +7,7 @@ pub mod ai;
 pub mod fen;
 pub mod game;
 pub mod local_board;
+pub mod monte_carlo;
 
 pub const WIN_STATES: [[usize; 3]; 8] = [
     [0, 1, 2],
@@ -20,11 +21,11 @@ pub const WIN_STATES: [[usize; 3]; 8] = [
 ];
 
 #[wasm_bindgen]
-#[derive(Clone, Copy, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize)]
 pub enum Piece {
-    BLANK,
-    X,
-    O,
+    BLANK = 0,
+    X = 1,
+    O = 2,
 }
 
 #[cfg(test)]

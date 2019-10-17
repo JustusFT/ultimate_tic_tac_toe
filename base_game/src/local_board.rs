@@ -1,6 +1,6 @@
 use crate::{Piece, WIN_STATES};
 
-#[derive(Clone, Copy, Serialize)]
+#[derive(Clone, Copy, Debug, Serialize)]
 pub struct LocalBoard {
     pub board: [Piece; 9],
     pub claimer: Option<Piece>,

@@ -201,8 +201,8 @@ fn main() {
     // Enter raw mode.
     let mut stdout = stdout().into_raw_mode().unwrap();
 
-    // let mut game = base_game::Game::new();
-    let mut game = base_game::fen::new_from_fen("........./........./....x..../.....o.../....xo.../...x..x../..o....../........./......... x........ x -").unwrap();
+    let mut game = base_game::game::Game::new();
+    // let mut game = base_game::fen::new_from_fen("........./........./....x..../.....o.../....xo.../...x..x../..o....../........./......... x........ x -").unwrap();
 
     loop {
         draw_board(&game, &mut stdout);
@@ -210,7 +210,18 @@ fn main() {
         request_user_move(&mut game);
         draw_board(&game, &mut stdout);
         println!("\rCPU is thinking...");
-        let (best_move_a, best_move, _) = base_game::ai::negamax(&mut game, 5, -3000, 3000, -1);
-        game.make_move(best_move_a.unwrap(), best_move.unwrap());
+        let cpu_move = base_game::monte_carlo::evaluate(&mut game);
+        match cpu_move {
+            Some((a, b)) => {
+                println!("{}, {} is the move", a, b);
+                game.make_move(a, b);
+            }
+            None => {
+                println!("No move was evaluated!");
+                break;
+            }
+        }
+        // let (best_move_a, best_move, _) = base_game::ai::negamax(&mut game, 5, -3000, 3000, -1);
+        // game.make_move(best_move_a.unwrap(), best_move.unwrap());
     }
 }
