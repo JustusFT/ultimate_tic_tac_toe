@@ -1,4 +1,4 @@
-use crate::game::Game;
+use crate::game::{Game,GameBuilder};
 use crate::local_board::LocalBoard;
 use crate::Piece;
 use std::char;
@@ -74,13 +74,11 @@ pub fn new_from_fen(fen: &str) -> Result<Game, String> {
         _ => return Err("Current board is an invalid character".to_string()),
     };
 
-    Ok(Game {
-        local_boards: boards,
-        current_board: current_board,
-        turn: turn,
-        winner: None,
-        history: Vec::new(),
-    })
+    return Ok(GameBuilder::new()
+        .with_initial_local_boards(boards)
+        .with_initial_current_board(current_board)
+        .with_initial_turn(turn)
+        .build());
 }
 
 pub fn get_fen(game: &Game) -> String {

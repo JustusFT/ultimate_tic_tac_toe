@@ -202,7 +202,7 @@ fn main() {
     let mut stdout = stdout().into_raw_mode().unwrap();
 
     let mut game = base_game::game::Game::new();
-    // let mut game = base_game::fen::new_from_fen("........./........./....x..../.....o.../....xo.../...x..x../..o....../........./......... x........ x -").unwrap();
+    // let mut game = base_game::fen::new_from_fen("x.x..xx.o/.xo.o...x/.xxo.oox./..oxx.o../...x..o.x/.o.....x./o.x...xxx/o.o.o..../oo.o..o.x ......x.o o 6").unwrap();
 
     loop {
         draw_board(&game, &mut stdout);
