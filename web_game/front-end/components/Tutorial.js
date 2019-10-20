@@ -71,7 +71,7 @@ const pages = [
     text: (
       <p>
         If a player manages to get 3 of their pieces in a row, they win that
-        board.
+        board. We mark the board with a bigger X or O.
       </p>
     ),
     fen:
@@ -116,7 +116,12 @@ const pages = [
       'o.....xxx/.ox.xxooo/o..xxx..o/xoox..xx./ox.ox.oo./x.xooo.o./.xo..oxoo/oxooxxxox/.o..o.xxx xoxxooo-x x -'
   },
   {
-    text: <p>And that's all you need to know to play Ultimate Tic Tac Toe!</p>,
+    text: (
+      <>
+        <p>And that's all you need to know to play Ultimate Tic Tac Toe!</p>
+        <p>Click the button on the top left to go back to the menu.</p>
+      </>
+    ),
     fen:
       'o.....xxx/.ox.xxooo/o..xxx..o/xoox..xx./ox.ox.oo./x.xooo.o./.xo..oxoo/oxooxxxox/.o..o.xxx xoxxooo-x x -'
   }
