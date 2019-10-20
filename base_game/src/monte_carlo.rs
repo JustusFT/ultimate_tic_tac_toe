@@ -2,6 +2,7 @@ use crate::game;
 use crate::Piece;
 use rand::prelude::*;
 use std::collections::HashMap;
+use wasm_bindgen::prelude::*;
 
 fn vacant_squares_for_board(game: &game::Game, board_index: u8) -> Vec<(u8, u8)> {
   let mut legal = Vec::new();
@@ -66,6 +67,7 @@ impl MctsNode {
   }
 }
 
+#[wasm_bindgen]
 pub struct MctsTree {
   games: HashMap<u64, MctsNode>
 }

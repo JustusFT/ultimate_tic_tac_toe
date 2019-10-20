@@ -11,6 +11,7 @@ import('../../wasm/pkg').then(pkg => {
   }
 
   let game;
+  let searchTree;
 
   onmessage = function(event) {
     const { data } = event;
@@ -21,9 +22,13 @@ import('../../wasm/pkg').then(pkg => {
         if (game) {
           game.free();
         }
+        if (searchTree) {
+          searchTree.free();
+        }
         // create new game
         try {
           game = fen ? pkg.new_from_fen(fen) : pkg.new_game();
+          searchTree = pkg.new_mcts();
         } catch (e) {
           console.error(e);
         }
@@ -37,7 +42,7 @@ import('../../wasm/pkg').then(pkg => {
         break;
       }
       case 'CPU_MOVE': {
-        pkg.cpu_move(game, 5);
+        pkg.cpu_move(game, searchTree);
         updateState(game);
         break;
       }
