@@ -9,6 +9,7 @@ const CellContainer = styled.div`
 `;
 
 const Highlight = styled.div`
+  mix-blend-mode: exclusion;
   display: flex;
   align-items: center;
   justify-content: center;
