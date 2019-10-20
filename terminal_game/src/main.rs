@@ -158,7 +158,7 @@ fn draw_board(
 // request input for next move
 fn request_user_move(game: &mut base_game::game::Game) {
     let mut rl = Editor::<()>::new();
-    let mut current_board_index: u8;
+    let current_board_index: u8;
 
     match game.current_board {
         Some(x) => {
@@ -170,9 +170,17 @@ fn request_user_move(game: &mut base_game::game::Game) {
             let readline = rl.readline("> ");
             match readline {
                 Ok(line) => {
-                    current_board_index = line.parse::<u8>().unwrap();
-                    if game.local_boards[usize::from(current_board_index)].claimer == None {
-                        break;
+                    // attempt to convert the string to a number
+                    match line.parse::<u8>() {
+                        Ok(board_number) => {
+                            if game.local_boards[usize::from(board_number)].claimer == None {
+                                current_board_index = board_number;
+                                break;
+                            } else {
+                                println!("\rBoard #{} is already claimed!", board_number);
+                            }
+                        }
+                        Err(_) => println!("\rPlease insert a number from 1-9"),
                     }
                 }
                 _ => {}
@@ -184,15 +192,20 @@ fn request_user_move(game: &mut base_game::game::Game) {
         print!("\rInput cell #");
         let readline = rl.readline("> ");
         match readline {
-            Ok(line) => {
-                let n = line.parse::<u8>().unwrap();
-                if game.local_boards[usize::from(current_board_index)].board[usize::from(n)]
-                    == base_game::Piece::BLANK
-                {
-                    game.make_move(current_board_index, n);
-                    break;
+            Ok(line) => match line.parse::<u8>() {
+                Ok(cell_number) => {
+                    if game.local_boards[usize::from(current_board_index)].board
+                        [usize::from(cell_number)]
+                        == base_game::Piece::BLANK
+                    {
+                        game.make_move(current_board_index, cell_number);
+                        break;
+                    } else {
+                        println!("\rCell #{} is already taken!", cell_number);
+                    }
                 }
-            }
+                Err(_) => println!("\rPlease insert a number from 1-9"),
+            },
             _ => {}
         }
     }
@@ -204,7 +217,6 @@ fn main() {
 
     let mut game = base_game::game::Game::new();
     let mut search_tree = base_game::monte_carlo::MctsTree::new();
-    // let mut game = base_game::fen::new_from_fen("x.x..xx.o/.xo.o...x/.xxo.oox./..oxx.o../...x..o.x/.o.....x./o.x...xxx/o.o.o..../oo.o..o.x ......x.o o 6").unwrap();
 
     loop {
         draw_board(&game, &mut stdout);
@@ -218,15 +230,12 @@ fn main() {
         });
         match cpu_move {
             Some((a, b)) => {
-                println!("{}, {} is the move", a, b);
                 game.make_move(a, b);
             }
             None => {
-                println!("No move was evaluated!");
-                break;
+                println!("CPU can't make a move!");
+                panic!();
             }
         }
-        // let (best_move_a, best_move, _) = base_game::ai::negamax(&mut game, 5, -3000, 3000, -1);
-        // game.make_move(best_move_a.unwrap(), best_move.unwrap());
     }
 }
