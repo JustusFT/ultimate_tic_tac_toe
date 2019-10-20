@@ -2,6 +2,7 @@ use base_game;
 use rustyline::Editor;
 use std::convert::TryFrom;
 use std::io::{stdout, Write};
+use std::time::Instant;
 use termion::clear;
 use termion::cursor;
 use termion::raw::IntoRawMode;
@@ -202,6 +203,7 @@ fn main() {
     let mut stdout = stdout().into_raw_mode().unwrap();
 
     let mut game = base_game::game::Game::new();
+    let mut search_tree = base_game::monte_carlo::MctsTree::new();
     // let mut game = base_game::fen::new_from_fen("x.x..xx.o/.xo.o...x/.xxo.oox./..oxx.o../...x..o.x/.o.....x./o.x...xxx/o.o.o..../oo.o..o.x ......x.o o 6").unwrap();
 
     loop {
@@ -210,7 +212,10 @@ fn main() {
         request_user_move(&mut game);
         draw_board(&game, &mut stdout);
         println!("\rCPU is thinking...");
-        let cpu_move = base_game::monte_carlo::evaluate(&mut game);
+        let begin = Instant::now();
+        let cpu_move = search_tree.evaluate_while(&mut game, |games_ran| {
+            return begin.elapsed().as_secs() < 10 && games_ran < 10000;
+        });
         match cpu_move {
             Some((a, b)) => {
                 println!("{}, {} is the move", a, b);
