@@ -181,6 +181,12 @@ impl TerminalGame {
                         // attempt to convert the string to a number
                         match line.parse::<u8>() {
                             Ok(board_number) => {
+                                if board_number > 8 {
+                                    self.redraw_with_error(format!(
+                                        "Please insert a number from 0-8"
+                                    ));
+                                    continue;
+                                }
                                 if self.game.local_boards[usize::from(board_number)].claimer == None
                                 {
                                     self.draw_board();
@@ -194,7 +200,7 @@ impl TerminalGame {
                                 }
                             }
                             Err(_) => {
-                                self.redraw_with_error(format!("Please insert a number from 1-9"))
+                                self.redraw_with_error(format!("Please insert a number from 0-8"))
                             }
                         }
                     }
@@ -210,6 +216,10 @@ impl TerminalGame {
             match readline {
                 Ok(line) => match line.parse::<u8>() {
                     Ok(cell_number) => {
+                        if cell_number > 8 {
+                            self.redraw_with_error(format!("Please insert a number from 0-8"));
+                            continue;
+                        }
                         if self.game.local_boards[usize::from(current_board_index)].board
                             [usize::from(cell_number)]
                             == base_game::Piece::BLANK
@@ -223,7 +233,7 @@ impl TerminalGame {
                             ));
                         }
                     }
-                    Err(_) => self.redraw_with_error(format!("Please insert a number from 1-9")),
+                    Err(_) => self.redraw_with_error(format!("Please insert a number from 0-8")),
                 },
                 _ => {}
             }
