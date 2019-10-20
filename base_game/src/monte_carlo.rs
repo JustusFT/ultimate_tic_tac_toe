@@ -50,6 +50,13 @@ fn opponent_for(piece: Piece) -> Piece {
   }
 }
 
+fn ucb1(node: &MctsNode, parent_node: &MctsNode) -> f32 {
+  let exploration_factor = 1.414;
+  let win_rate = node.games_won as f32 / node.games_played as f32;
+  
+  return win_rate + exploration_factor * ((parent_node.games_played as f32).ln() / (node.games_played as f32)).sqrt();
+}
+
 impl MctsNode {
   fn new(player: Piece) -> MctsNode {
     MctsNode {
@@ -75,13 +82,21 @@ pub fn evaluate(game: &mut game::Game) -> Option<(u8, u8)> {
 
     // Selection: traverse down the tree until you need to create a new node
     loop {
-      let legal = legal_moves(&game);
-
-      if legal.len() == 0 {
+      if game.winner != None {
         // this means you reached the end of the game line. the game is over and no further expansion is possible.
-        // at this point, if we select from ucb1 we will keep selecting the same line if we do try again, so might as well stop evaluating
-        // if selections were random it's still possible to reveal new lines, but the longer we continue the less likely we will find newer ones
-        // so break if ucb1, continue to try again for random
+        // can't do simulation either, so skip to backpropagation
+        // TODO reduce duplicate code
+        // Backpropagation: update the results of the simulated game line
+        while let Some(line) = current_game_line.pop() {
+          let node = game_states.get_mut(&line).unwrap();
+          // winning is worth 2 so draws can be worth 1
+          node.games_played += 2;
+          if game.winner == Some(node.player) {
+            node.games_won += 2;
+          } else if game.winner == Some(Piece::BLANK) {
+            node.games_won += 1;
+          }
+        }
 
         // remember to rewind the game back to the initial state
         while moves_made > 0 {
@@ -91,6 +106,8 @@ pub fn evaluate(game: &mut game::Game) -> Option<(u8, u8)> {
         // break 'outer;
         continue 'outer;
       }
+
+      let legal = legal_moves(&game);
 
       let unvisited_nodes = legal
         .iter()
@@ -105,11 +122,26 @@ pub fn evaluate(game: &mut game::Game) -> Option<(u8, u8)> {
 
       if unvisited_nodes.len() == 0 {
         // if all the children nodes were visited at least once, then do ubc1 selection to choose which branch to explore
-        // but for now i do it randomly
-        let mut rng = thread_rng();
-        let selected_index = rng.gen_range(0, legal.len());
-        let (a, b) = legal[selected_index];
-        game.make_move(a, b);
+        let mut best_move: Option<(u8, u8)> = None;
+        let mut best_score: Option<f32> = None;
+        let parent_node = game_states.get(&game.hash).unwrap();
+
+        for j in 0..legal.len() {
+          let (a, b) = legal[j];
+          game.make_move(a, b);
+          let score = ucb1(game_states.get(&game.hash).unwrap(), parent_node);
+          if score > best_score.unwrap_or(-1.0) {
+            best_score = Some(score);
+            best_move = Some((a, b));
+          }
+          game.undo_move();
+        }
+
+        match best_move {
+          Some((a, b)) => game.make_move(a, b),
+          None => panic!("Failed selection phase")
+        }
+
         current_game_line.push(game.hash);
         moves_made += 1;
       } else {
