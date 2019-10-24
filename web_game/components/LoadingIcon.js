@@ -46,7 +46,7 @@ export default function LoadingIcon() {
     <Container>
       <Grid>
         {[0, 1, 2, 3, 4, 5, 6, 7, 8].map(x => (
-          <Cell index={x}>
+          <Cell index={x} key={x}>
             {x != 4 && <CellBox speed={2} delay={delays[x]} />}
           </Cell>
         ))}

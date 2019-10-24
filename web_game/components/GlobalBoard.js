@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Measure from 'react-measure';
 import styled from 'styled-components';
 import LocalBoard from './LocalBoard';
@@ -29,6 +29,18 @@ const Area = styled.div`
 
 export default function GlobalBoard({ game, onMove }) {
   const [dimensions, setDimensions] = useState({ x: -1, y: -1 });
+  const redrawRef = useRef(null);
+
+  useEffect(() => {
+    // this will force redraw the board
+    // it seems like on firefox the board isn't drawn until the user does something like click anywhere on the page
+    // the cause seems to be the `mix-blend-mode` style in Cell.js since removing it fixes the issue
+    redrawRef.current.style.visibility = 'hidden';
+    setTimeout(() => {
+      redrawRef.current.style.visibility = 'visible';
+    }, 0);
+  }, []);
+
   return (
     <Measure
       bounds
@@ -38,25 +50,27 @@ export default function GlobalBoard({ game, onMove }) {
     >
       {({ measureRef }) => (
         <Area ref={measureRef}>
-          <Grid dimensions={dimensions}>
-            {game.local_boards.map((board, boardIndex) => {
-              const active =
-                !game.winner &&
-                game.local_boards[boardIndex].claimer === null &&
-                (game.current_board === null ||
-                  game.current_board === boardIndex);
-              return (
-                <LocalBoard
-                  key={boardIndex}
-                  data={board}
-                  active={active}
-                  boardIndex={boardIndex}
-                  onMove={onMove}
-                  lastMove={game.history[game.history.length - 1]}
-                />
-              );
-            })}
-          </Grid>
+          <div ref={redrawRef}>
+            <Grid dimensions={dimensions}>
+              {game.local_boards.map((board, boardIndex) => {
+                const active =
+                  !game.winner &&
+                  game.local_boards[boardIndex].claimer === null &&
+                  (game.current_board === null ||
+                    game.current_board === boardIndex);
+                return (
+                  <LocalBoard
+                    key={boardIndex}
+                    data={board}
+                    active={active}
+                    boardIndex={boardIndex}
+                    onMove={onMove}
+                    lastMove={game.history[game.history.length - 1]}
+                  />
+                );
+              })}
+            </Grid>
+          </div>
         </Area>
       )}
     </Measure>
