@@ -1,6 +1,7 @@
 use crate::game;
 use crate::Piece;
-use rand::prelude::*;
+use rand::Rng;
+use rand_pcg::Lcg64Xsh32;
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
 
@@ -53,8 +54,10 @@ fn opponent_for(piece: Piece) -> Piece {
 fn ucb1(node: &MctsNode, parent_node: &MctsNode) -> f32 {
   let exploration_factor = 1.414;
   let win_rate = node.games_won as f32 / node.games_played as f32;
-  
-  return win_rate + exploration_factor * ((parent_node.games_played as f32).ln() / (node.games_played as f32)).sqrt();
+
+  return win_rate
+    + exploration_factor
+      * ((parent_node.games_played as f32).ln() / (node.games_played as f32)).sqrt();
 }
 
 impl MctsNode {
@@ -69,23 +72,28 @@ impl MctsNode {
 
 #[wasm_bindgen]
 pub struct MctsTree {
-  games: HashMap<u64, MctsNode>
+  games: HashMap<u64, MctsNode>,
+  rng: Lcg64Xsh32,
 }
 
 impl MctsTree {
   pub fn new() -> MctsTree {
     MctsTree {
-      games: HashMap::new()
+      games: HashMap::new(),
+      rng: Lcg64Xsh32::new(0xcafef00dd15ea5e5, 0xa02bdbf7bb3c0a7),
     }
   }
 
-  pub fn evaluate_while<F>(&mut self, game: &mut game::Game, condition: F) -> Option<(u8, u8)> where
-  F: Fn(i32) -> bool {
+  pub fn evaluate_while<F>(&mut self, game: &mut game::Game, condition: F) -> Option<(u8, u8)>
+  where
+    F: Fn(i32) -> bool,
+  {
     let initial_hash = game.hash;
 
     // the root represents the opponent, and its immediate children represent the next player to move
     // this way the potential next move's data will represent which move for the current player would lead to more wins
-    self.games
+    self
+      .games
       .entry(initial_hash)
       .or_insert(MctsNode::new(opponent_for(game.turn)));
 
@@ -155,19 +163,20 @@ impl MctsTree {
 
           match best_move {
             Some((a, b)) => game.make_move(a, b),
-            None => panic!("Failed selection phase")
+            None => panic!("Failed selection phase"),
           }
 
           current_game_line.push(game.hash);
           moves_made += 1;
         } else {
           // Expansion: Expand one of the nodes that wasn't visited yet.
-          let mut rng = thread_rng();
-          let selected_index = rng.gen_range(0, unvisited_nodes.len());
+          let selected_index = self.rng.gen_range(0, unvisited_nodes.len());
           let (a, b) = *unvisited_nodes[selected_index];
           game.make_move(a, b);
           current_game_line.push(game.hash);
-          self.games.insert(game.hash, MctsNode::new(opponent_for(game.turn)));
+          self
+            .games
+            .insert(game.hash, MctsNode::new(opponent_for(game.turn)));
           moves_made += 1;
           break;
         }
@@ -196,12 +205,12 @@ impl MctsTree {
           break;
         }
         let legal = legal_moves(&game);
-        let mut rng = thread_rng();
-        let selected_index = rng.gen_range(0, legal.len());
+        let selected_index = self.rng.gen_range(0, legal.len());
         let (a, b) = legal[selected_index];
         game.make_move(a, b);
         current_game_line.push(game.hash);
-        self.games
+        self
+          .games
           .entry(game.hash)
           .or_insert(MctsNode::new(opponent_for(game.turn)));
         moves_made += 1;
@@ -232,5 +241,30 @@ impl MctsTree {
     }
 
     return best_move;
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::fen;
+  use std::fs::File;
+  use std::io::{prelude::*, BufReader};
+
+  // when refactoring ai, make sure that it does the same moves as it did before
+  // the ai will output the same game given same seed and simulation count
+  #[test]
+  fn ai_did_not_change_its_moves() {
+    let mut game = game::Game::new();
+    let mut ai = MctsTree::new();
+    let file = File::open("test_data/ai_simulation").unwrap();
+    let reader = BufReader::new(file);
+
+    for line in reader.lines() {
+      let cpu_move = ai.evaluate_while(&mut game, |x| x < 100).unwrap();
+      game.make_move(cpu_move.0, cpu_move.1);
+      let fen = fen::get_fen(&game);
+      assert_eq!(line.unwrap(), fen);
+    }
   }
 }
