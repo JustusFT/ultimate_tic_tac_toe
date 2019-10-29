@@ -84,140 +84,119 @@ impl MctsTree {
     }
   }
 
-  pub fn evaluate_while<F>(&mut self, game: &mut game::Game, condition: F) -> Option<(u8, u8)>
-  where
-    F: Fn(i32) -> bool,
-  {
-    let initial_hash = game.hash;
-
-    // the root represents the opponent, and its immediate children represent the next player to move
-    // this way the potential next move's data will represent which move for the current player would lead to more wins
-    self
-      .games
-      .entry(initial_hash)
-      .or_insert(MctsNode::new(opponent_for(game.turn)));
-
-    let mut moves_made = 0;
-    let mut games_ran = 0;
-
-    'outer: while condition(games_ran) {
-      games_ran += 1;
-      let mut current_game_line = vec![initial_hash];
-
-      // Selection: traverse down the tree until you need to create a new node
-      loop {
-        if game.winner != None {
-          // this means you reached the end of the game line. the game is over and no further expansion is possible.
-          // can't do simulation either, so skip to backpropagation
-          // TODO reduce duplicate code
-          // Backpropagation: update the results of the simulated game line
-          while let Some(line) = current_game_line.pop() {
-            let node = self.games.get_mut(&line).unwrap();
-            // winning is worth 2 so draws can be worth 1
-            node.games_played += 2;
-            if game.winner == Some(node.player) {
-              node.games_won += 2;
-            } else if game.winner == Some(Piece::BLANK) {
-              node.games_won += 1;
-            }
-          }
-
-          // remember to rewind the game back to the initial state
-          while moves_made > 0 {
-            game.undo_move();
-            moves_made -= 1;
-          }
-          // break 'outer;
-          continue 'outer;
-        }
-
-        let legal = legal_moves(&game);
-
-        let unvisited_nodes = legal
-          .iter()
-          .filter(|(a, b)| {
-            game.make_move(*a, *b);
-            let new_hash = game.hash;
-            game.undo_move();
-            let was_not_visited = self.games.get(&new_hash) == None;
-            return was_not_visited;
-          })
-          .collect::<Vec<&(u8, u8)>>();
-
-        if unvisited_nodes.len() == 0 {
-          // if all the children nodes were visited at least once, then do ubc1 selection to choose which branch to explore
-          let mut best_move: Option<(u8, u8)> = None;
-          let mut best_score: Option<f32> = None;
-          let parent_node = self.games.get(&game.hash).unwrap();
-
-          for j in 0..legal.len() {
-            let (a, b) = legal[j];
-            game.make_move(a, b);
-            let score = ucb1(self.games.get(&game.hash).unwrap(), parent_node);
-            if score > best_score.unwrap_or(-1.0) {
-              best_score = Some(score);
-              best_move = Some((a, b));
-            }
-            game.undo_move();
-          }
-
-          match best_move {
-            Some((a, b)) => game.make_move(a, b),
-            None => panic!("Failed selection phase"),
-          }
-
-          current_game_line.push(game.hash);
-          moves_made += 1;
-        } else {
-          // Expansion: Expand one of the nodes that wasn't visited yet.
-          let selected_index = self.rng.gen_range(0, unvisited_nodes.len());
-          let (a, b) = *unvisited_nodes[selected_index];
-          game.make_move(a, b);
-          current_game_line.push(game.hash);
-          self
-            .games
-            .insert(game.hash, MctsNode::new(opponent_for(game.turn)));
-          moves_made += 1;
-          break;
-        }
+  // Traverse down the tree until
+  // - You need to create a new node. When this happens, create and select the new node and return true.
+  // - You can't traverse any further (the game ends). When this happens, return false.
+  fn select_line(
+    &mut self,
+    game: &mut game::Game,
+    hash_line: &mut Vec<u64>,
+    moves_made: &mut i32,
+  ) -> bool {
+    loop {
+      if game.winner != None {
+        // this means you reached the end of the game line. the game is over and no further expansion is possible.
+        return false;
       }
 
-      // Simulation: make random moves until the game is over
-      loop {
-        if game.winner != None {
-          // Backpropagation: update the results of the simulated game line
-          while let Some(line) = current_game_line.pop() {
-            let node = self.games.get_mut(&line).unwrap();
-            // winning is worth 2 so draws can be worth 1
-            node.games_played += 2;
-            if game.winner == Some(node.player) {
-              node.games_won += 2;
-            } else if game.winner == Some(Piece::BLANK) {
-              node.games_won += 1;
-            }
-          }
+      let legal = legal_moves(&game);
 
-          // remember to rewind the game back to the initial state
-          while moves_made > 0 {
-            game.undo_move();
-            moves_made -= 1;
+      let unvisited_nodes = legal
+        .iter()
+        .filter(|(a, b)| {
+          game.make_move(*a, *b);
+          let new_hash = game.hash;
+          game.undo_move();
+          let was_not_visited = self.games.get(&new_hash) == None;
+          return was_not_visited;
+        })
+        .collect::<Vec<&(u8, u8)>>();
+
+      if unvisited_nodes.len() == 0 {
+        // if all the children nodes were visited at least once, then do ubc1 selection to choose which branch to explore
+        let mut best_move: Option<(u8, u8)> = None;
+        let mut best_score: Option<f32> = None;
+        let parent_node = self.games.get(&game.hash).unwrap();
+
+        for j in 0..legal.len() {
+          let (a, b) = legal[j];
+          game.make_move(a, b);
+          let score = ucb1(self.games.get(&game.hash).unwrap(), parent_node);
+          if score > best_score.unwrap_or(-1.0) {
+            best_score = Some(score);
+            best_move = Some((a, b));
           }
-          break;
+          game.undo_move();
         }
-        let legal = legal_moves(&game);
-        let selected_index = self.rng.gen_range(0, legal.len());
-        let (a, b) = legal[selected_index];
+
+        match best_move {
+          Some((a, b)) => game.make_move(a, b),
+          None => panic!("Failed selection phase"),
+        }
+
+        hash_line.push(game.hash);
+        *moves_made += 1;
+      } else {
+        // Expand one of the nodes that wasn't visited yet.
+        let selected_index = self.rng.gen_range(0, unvisited_nodes.len());
+        let (a, b) = *unvisited_nodes[selected_index];
         game.make_move(a, b);
-        current_game_line.push(game.hash);
+        hash_line.push(game.hash);
         self
           .games
-          .entry(game.hash)
-          .or_insert(MctsNode::new(opponent_for(game.turn)));
-        moves_made += 1;
+          .insert(game.hash, MctsNode::new(opponent_for(game.turn)));
+        *moves_made += 1;
+        return true;
+      }
+    }
+  }
+
+  // Make random moves until the game is over
+  fn simulate(&mut self, game: &mut game::Game, hash_line: &mut Vec<u64>, moves_made: &mut i32) {
+    loop {
+      if game.winner != None {
+        return;
+      }
+      let legal = legal_moves(&game);
+      let selected_index = self.rng.gen_range(0, legal.len());
+      let (a, b) = legal[selected_index];
+      game.make_move(a, b);
+      hash_line.push(game.hash);
+      self
+        .games
+        .entry(game.hash)
+        .or_insert(MctsNode::new(opponent_for(game.turn)));
+      *moves_made += 1;
+    }
+  }
+
+  // Update the results of the simulated game line
+  fn backpropagate(
+    &mut self,
+    game: &mut game::Game,
+    hash_line: &mut Vec<u64>,
+    moves_made: &mut i32,
+  ) {
+    while let Some(line) = hash_line.pop() {
+      let node = self.games.get_mut(&line).unwrap();
+      // winning is worth 2 so draws can be worth 1
+      node.games_played += 2;
+      if game.winner == Some(node.player) {
+        node.games_won += 2;
+      } else if game.winner == Some(Piece::BLANK) {
+        node.games_won += 1;
       }
     }
 
-    // time to pick the best move and return it
+    // rewind the game back to the initial state
+    while *moves_made > 0 {
+      game.undo_move();
+      *moves_made -= 1;
+    }
+  }
+
+  // time to pick the best move from the current game state
+  fn pick_best_move(&mut self, game: &mut game::Game) -> Option<(u8, u8)> {
     let legal = legal_moves(&game);
     let mut best_score: Option<f32> = None;
     let mut best_move: Option<(u8, u8)> = None;
@@ -241,6 +220,35 @@ impl MctsTree {
     }
 
     return best_move;
+  }
+
+  pub fn evaluate_while<F>(&mut self, game: &mut game::Game, condition: F) -> Option<(u8, u8)>
+  where
+    F: Fn(i32) -> bool,
+  {
+    let initial_hash = game.hash;
+
+    // the root represents the opponent, and its immediate children represent the next player to move
+    // this way the potential next move's data will represent which move for the current player would lead to more wins
+    self
+      .games
+      .entry(initial_hash)
+      .or_insert(MctsNode::new(opponent_for(game.turn)));
+
+    let mut moves_made = 0;
+    let mut games_ran = 0;
+
+    'outer: while condition(games_ran) {
+      games_ran += 1;
+      let mut current_game_line = vec![initial_hash];
+
+      if self.select_line(game, &mut current_game_line, &mut moves_made) {
+        self.simulate(game, &mut current_game_line, &mut moves_made);
+      }
+      self.backpropagate(game, &mut current_game_line, &mut moves_made);
+    }
+
+    return self.pick_best_move(game);
   }
 }
 
