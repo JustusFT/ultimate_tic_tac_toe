@@ -22,56 +22,56 @@
 /******/ 	function promiseResolve() { return Promise.resolve(); }
 /******/
 /******/ 	var wasmImportObjects = {
-/******/ 		"../wasm/pkg/index_bg.wasm": function() {
+/******/ 		"./wasm-bindings/pkg/index_bg.wasm": function() {
 /******/ 			return {
 /******/ 				"./index.js": {
 /******/ 					"__wbg_now_2ed7c83e40d461d6": function() {
-/******/ 						return installedModules["../wasm/pkg/index.js"].exports["__wbg_now_2ed7c83e40d461d6"]();
+/******/ 						return installedModules["./wasm-bindings/pkg/index.js"].exports["__wbg_now_2ed7c83e40d461d6"]();
 /******/ 					},
 /******/ 					"__wbindgen_json_parse": function(p0i32,p1i32) {
-/******/ 						return installedModules["../wasm/pkg/index.js"].exports["__wbindgen_json_parse"](p0i32,p1i32);
+/******/ 						return installedModules["./wasm-bindings/pkg/index.js"].exports["__wbindgen_json_parse"](p0i32,p1i32);
 /******/ 					},
 /******/ 					"__wbindgen_string_new": function(p0i32,p1i32) {
-/******/ 						return installedModules["../wasm/pkg/index.js"].exports["__wbindgen_string_new"](p0i32,p1i32);
+/******/ 						return installedModules["./wasm-bindings/pkg/index.js"].exports["__wbindgen_string_new"](p0i32,p1i32);
 /******/ 					},
 /******/ 					"__wbindgen_object_drop_ref": function(p0i32) {
-/******/ 						return installedModules["../wasm/pkg/index.js"].exports["__wbindgen_object_drop_ref"](p0i32);
+/******/ 						return installedModules["./wasm-bindings/pkg/index.js"].exports["__wbindgen_object_drop_ref"](p0i32);
 /******/ 					},
 /******/ 					"__wbg_self_1801c027cb0e6124": function() {
-/******/ 						return installedModules["../wasm/pkg/index.js"].exports["__wbg_self_1801c027cb0e6124"]();
+/******/ 						return installedModules["./wasm-bindings/pkg/index.js"].exports["__wbg_self_1801c027cb0e6124"]();
 /******/ 					},
 /******/ 					"__wbg_crypto_3e91f24788b1203d": function(p0i32) {
-/******/ 						return installedModules["../wasm/pkg/index.js"].exports["__wbg_crypto_3e91f24788b1203d"](p0i32);
+/******/ 						return installedModules["./wasm-bindings/pkg/index.js"].exports["__wbg_crypto_3e91f24788b1203d"](p0i32);
 /******/ 					},
 /******/ 					"__wbg_getRandomValues_7ecea3ecacbb2f9e": function(p0i32) {
-/******/ 						return installedModules["../wasm/pkg/index.js"].exports["__wbg_getRandomValues_7ecea3ecacbb2f9e"](p0i32);
+/******/ 						return installedModules["./wasm-bindings/pkg/index.js"].exports["__wbg_getRandomValues_7ecea3ecacbb2f9e"](p0i32);
 /******/ 					},
 /******/ 					"__wbg_getRandomValues_f724b5822126eff7": function(p0i32,p1i32,p2i32) {
-/******/ 						return installedModules["../wasm/pkg/index.js"].exports["__wbg_getRandomValues_f724b5822126eff7"](p0i32,p1i32,p2i32);
+/******/ 						return installedModules["./wasm-bindings/pkg/index.js"].exports["__wbg_getRandomValues_f724b5822126eff7"](p0i32,p1i32,p2i32);
 /******/ 					},
 /******/ 					"__wbg_require_e89d842e759f0a4c": function(p0i32,p1i32) {
-/******/ 						return installedModules["../wasm/pkg/index.js"].exports["__wbg_require_e89d842e759f0a4c"](p0i32,p1i32);
+/******/ 						return installedModules["./wasm-bindings/pkg/index.js"].exports["__wbg_require_e89d842e759f0a4c"](p0i32,p1i32);
 /******/ 					},
 /******/ 					"__wbg_randomFillSync_eae3007264ffc138": function(p0i32,p1i32,p2i32) {
-/******/ 						return installedModules["../wasm/pkg/index.js"].exports["__wbg_randomFillSync_eae3007264ffc138"](p0i32,p1i32,p2i32);
+/******/ 						return installedModules["./wasm-bindings/pkg/index.js"].exports["__wbg_randomFillSync_eae3007264ffc138"](p0i32,p1i32,p2i32);
 /******/ 					},
 /******/ 					"__wbindgen_is_undefined": function(p0i32) {
-/******/ 						return installedModules["../wasm/pkg/index.js"].exports["__wbindgen_is_undefined"](p0i32);
+/******/ 						return installedModules["./wasm-bindings/pkg/index.js"].exports["__wbindgen_is_undefined"](p0i32);
 /******/ 					},
 /******/ 					"__wbg_error_4bb6c2a97407129a": function(p0i32,p1i32) {
-/******/ 						return installedModules["../wasm/pkg/index.js"].exports["__wbg_error_4bb6c2a97407129a"](p0i32,p1i32);
+/******/ 						return installedModules["./wasm-bindings/pkg/index.js"].exports["__wbg_error_4bb6c2a97407129a"](p0i32,p1i32);
 /******/ 					},
 /******/ 					"__wbg_new_59cb74e423758ede": function() {
-/******/ 						return installedModules["../wasm/pkg/index.js"].exports["__wbg_new_59cb74e423758ede"]();
+/******/ 						return installedModules["./wasm-bindings/pkg/index.js"].exports["__wbg_new_59cb74e423758ede"]();
 /******/ 					},
 /******/ 					"__wbg_stack_558ba5917b466edd": function(p0i32,p1i32) {
-/******/ 						return installedModules["../wasm/pkg/index.js"].exports["__wbg_stack_558ba5917b466edd"](p0i32,p1i32);
+/******/ 						return installedModules["./wasm-bindings/pkg/index.js"].exports["__wbg_stack_558ba5917b466edd"](p0i32,p1i32);
 /******/ 					},
 /******/ 					"__wbindgen_throw": function(p0i32,p1i32) {
-/******/ 						return installedModules["../wasm/pkg/index.js"].exports["__wbindgen_throw"](p0i32,p1i32);
+/******/ 						return installedModules["./wasm-bindings/pkg/index.js"].exports["__wbindgen_throw"](p0i32,p1i32);
 /******/ 					},
 /******/ 					"__wbindgen_rethrow": function(p0i32) {
-/******/ 						return installedModules["../wasm/pkg/index.js"].exports["__wbindgen_rethrow"](p0i32);
+/******/ 						return installedModules["./wasm-bindings/pkg/index.js"].exports["__wbindgen_rethrow"](p0i32);
 /******/ 					}
 /******/ 				}
 /******/ 			};
@@ -115,7 +115,7 @@
 /******/
 /******/ 		// Fetch + compile chunk loading for webassembly
 /******/
-/******/ 		var wasmModules = {"0":["../wasm/pkg/index_bg.wasm"]}[chunkId] || [];
+/******/ 		var wasmModules = {"0":["./wasm-bindings/pkg/index_bg.wasm"]}[chunkId] || [];
 /******/
 /******/ 		wasmModules.forEach(function(wasmModuleId) {
 /******/ 			var installedWasmModuleData = installedWasmModules[wasmModuleId];
@@ -125,7 +125,7 @@
 /******/ 				promises.push(installedWasmModuleData);
 /******/ 			else {
 /******/ 				var importObject = wasmImportObjects[wasmModuleId]();
-/******/ 				var req = fetch(__webpack_require__.p + "" + {"../wasm/pkg/index_bg.wasm":"90572c39fef69e1ed7bd"}[wasmModuleId] + ".module.wasm");
+/******/ 				var req = fetch(__webpack_require__.p + "" + {"./wasm-bindings/pkg/index_bg.wasm":"1d78516fa61fd5b691bf"}[wasmModuleId] + ".module.wasm");
 /******/ 				var promise;
 /******/ 				if(importObject instanceof Promise && typeof WebAssembly.compileStreaming === 'function') {
 /******/ 					promise = Promise.all([WebAssembly.compileStreaming(req), importObject]).then(function(items) {
@@ -259,7 +259,7 @@ function _arrayWithHoles(arr) {
 } // The game will run on a separate thread to keep the UI running smoothly.
 
 
-__webpack_require__.e(/*! import() */ 0).then(__webpack_require__.bind(null, /*! ../../wasm/pkg */ "../wasm/pkg/index.js")).then(function (pkg) {
+__webpack_require__.e(/*! import() */ 0).then(__webpack_require__.bind(null, /*! ../wasm-bindings/pkg */ "./wasm-bindings/pkg/index.js")).then(function (pkg) {
   // Sends the current game state to the main thread.
   // Call this function whenever you want to give the latest game data to React
   function updateState(game) {

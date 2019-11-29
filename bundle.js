@@ -571,6 +571,16 @@ function GlobalBoard(_ref) {
       dimensions = _useState2[0],
       setDimensions = _useState2[1];
 
+  var redrawRef = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(null);
+  Object(react__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(function () {
+    // this will force redraw the board
+    // it seems like on firefox the board isn't drawn until the user does something like click anywhere on the page
+    // the cause seems to be the `mix-blend-mode` style in Cell.js since removing it fixes the issue
+    redrawRef.current.style.visibility = 'hidden';
+    setTimeout(function () {
+      redrawRef.current.style.visibility = 'visible';
+    }, 0);
+  }, []);
   return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_measure__WEBPACK_IMPORTED_MODULE_1__["default"], {
     bounds: true,
     onResize: function onResize(contentRect) {
@@ -580,6 +590,8 @@ function GlobalBoard(_ref) {
     var measureRef = _ref2.measureRef;
     return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Area, {
       ref: measureRef
+    }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+      ref: redrawRef
     }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Grid, {
       dimensions: dimensions
     }, game.local_boards.map(function (board, boardIndex) {
@@ -592,7 +604,7 @@ function GlobalBoard(_ref) {
         onMove: onMove,
         lastMove: game.history[game.history.length - 1]
       });
-    })));
+    }))));
   });
 }
 
@@ -725,7 +737,8 @@ var delays = [0, 1, 2, 7, 8, 3, 6, 5, 4];
 function LoadingIcon() {
   return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Container, null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Grid, null, [0, 1, 2, 3, 4, 5, 6, 7, 8].map(function (x) {
     return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Cell, {
-      index: x
+      index: x,
+      key: x
     }, x != 4 && react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(CellBox, {
       speed: 2,
       delay: delays[x]

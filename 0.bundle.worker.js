@@ -1,9 +1,9 @@
 self["webpackChunk"]([0],{
 
-/***/ "../wasm/pkg sync recursive":
-/*!************************!*\
-  !*** ../wasm/pkg sync ***!
-  \************************/
+/***/ "./wasm-bindings/pkg sync recursive":
+/*!********************************!*\
+  !*** ./wasm-bindings/pkg sync ***!
+  \********************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
@@ -15,14 +15,14 @@ function webpackEmptyContext(req) {
 webpackEmptyContext.keys = function() { return []; };
 webpackEmptyContext.resolve = webpackEmptyContext;
 module.exports = webpackEmptyContext;
-webpackEmptyContext.id = "../wasm/pkg sync recursive";
+webpackEmptyContext.id = "./wasm-bindings/pkg sync recursive";
 
 /***/ }),
 
-/***/ "../wasm/pkg/index.js":
-/*!****************************!*\
-  !*** ../wasm/pkg/index.js ***!
-  \****************************/
+/***/ "./wasm-bindings/pkg/index.js":
+/*!************************************!*\
+  !*** ./wasm-bindings/pkg/index.js ***!
+  \************************************/
 /*! exports provided: init, new_game, new_mcts, new_from_fen, get_fen, get_game_state, cpu_move, Piece, Game, MctsTree, ZorbistHasher, __wbg_now_2ed7c83e40d461d6, __wbindgen_json_parse, __wbindgen_string_new, __wbindgen_object_drop_ref, __wbg_self_1801c027cb0e6124, __wbg_crypto_3e91f24788b1203d, __wbg_getRandomValues_7ecea3ecacbb2f9e, __wbg_getRandomValues_f724b5822126eff7, __wbg_require_e89d842e759f0a4c, __wbg_randomFillSync_eae3007264ffc138, __wbindgen_is_undefined, __wbg_error_4bb6c2a97407129a, __wbg_new_59cb74e423758ede, __wbg_stack_558ba5917b466edd, __wbindgen_throw, __wbindgen_rethrow */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -55,7 +55,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__wbg_stack_558ba5917b466edd", function() { return __wbg_stack_558ba5917b466edd; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__wbindgen_throw", function() { return __wbindgen_throw; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__wbindgen_rethrow", function() { return __wbindgen_rethrow; });
-/* harmony import */ var _index_bg_wasm__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./index_bg.wasm */ "../wasm/pkg/index_bg.wasm");
+/* harmony import */ var _index_bg_wasm__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./index_bg.wasm */ "./wasm-bindings/pkg/index_bg.wasm");
 
 /**
 */
@@ -596,7 +596,7 @@ const __wbg_getRandomValues_f724b5822126eff7 = function (arg0, arg1, arg2) {
 };
 const __wbg_require_e89d842e759f0a4c = function (arg0, arg1) {
   try {
-    const ret = __webpack_require__("../wasm/pkg sync recursive")(getStringFromWasm(arg0, arg1));
+    const ret = __webpack_require__("./wasm-bindings/pkg sync recursive")(getStringFromWasm(arg0, arg1));
 
     return addHeapObject(ret);
   } catch (e) {
@@ -658,10 +658,10 @@ _index_bg_wasm__WEBPACK_IMPORTED_MODULE_0__["__wbindgen_start"]();
 
 /***/ }),
 
-/***/ "../wasm/pkg/index_bg.wasm":
-/*!*********************************!*\
-  !*** ../wasm/pkg/index_bg.wasm ***!
-  \*********************************/
+/***/ "./wasm-bindings/pkg/index_bg.wasm":
+/*!*****************************************!*\
+  !*** ./wasm-bindings/pkg/index_bg.wasm ***!
+  \*****************************************/
 /*! exports provided: memory, __rustc_debug_gdb_scripts_section__, init, new_game, new_mcts, new_from_fen, get_fen, get_game_state, cpu_move, __wbg_zorbisthasher_free, __wbg_game_free, __wbg_get_game_current_board, __wbg_set_game_current_board, __wbg_get_game_turn, __wbg_set_game_turn, __wbg_get_game_winner, __wbg_set_game_winner, __wbg_get_game_hash, __wbg_set_game_hash, game_new, game_make_move, game_undo_move, __wbg_mctstree_free, __wbindgen_exn_store, __wbindgen_malloc, __wbindgen_realloc, __wbindgen_free, __wbindgen_start */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -672,7 +672,7 @@ __webpack_require__.r(exports);
 // export exports from WebAssembly module
 for(var name in wasmExports) if(name != "__webpack_init__") exports[name] = wasmExports[name];
 // exec imports from WebAssembly module (for esm order)
-/* harmony import */ var m0 = __webpack_require__(/*! ./index.js */ "../wasm/pkg/index.js");
+/* harmony import */ var m0 = __webpack_require__(/*! ./index.js */ "./wasm-bindings/pkg/index.js");
 
 
 // exec wasm module
